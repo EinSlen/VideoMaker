@@ -10,7 +10,7 @@ PREFIX = os.getenv('PREFIX')
 
 import discord
 from discord.ext import commands
-from download import VideoEditor
+from VideoMaker import VideoEditor
 
 intents = discord.Intents.default()
 intents.messages = True
