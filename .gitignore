@@ -1,0 +1,7 @@
+.idea/
+# IntelliJ
+out/
+
+.env
+
+venv
