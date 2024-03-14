@@ -4,10 +4,15 @@ import string
 import sys
 
 from pytube import YouTube
-from moviepy.video.VideoClip import TextClip
+from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from moviepy.editor import VideoFileClip, CompositeVideoClip
+from moviepy.video.fx import all as vfx
 
+VIDEOS_DIRECTORY = "videos/"
+RESOLUTION_TIKTOK = (720, 720)
+FPS_TIKTOK = 60
+EDITED_PATH = "edited/"
 
 class VideoEditor:
     def __init__(self, titre_video='', youtube_url=None, start_time_input=0, end_time_input=30, sous_title="non"):
@@ -61,19 +66,15 @@ class VideoEditor:
         print("Merge des vidéos... ")
         final_clip = clips_array([[clip1], [clip2]])
 
-        # Définir le nombre d'images par seconde (fps) pour TikTok
-        resolution_tiktok = (720, 720)
-        fps_tiktok = 60
+        final_clip = final_clip.resize(RESOLUTION_TIKTOK)
 
-        final_clip = final_clip.resize(resolution_tiktok)
-
-        final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac', fps=fps_tiktok)
+        final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac', fps=FPS_TIKTOK)
 
         clip1.close()
         clip2.close()
         final_clip.close()
 
-        self.add_text_to_video(output_path, "edited/" + self.PATH + "F.mp4", self.titre_video)
+        self.add_text_to_video(output_path, EDITED_PATH + self.PATH + "F.mp4", self.titre_video)
 
         print("Merge des vidéos avec succès ! ")
 
@@ -85,12 +86,15 @@ class VideoEditor:
             video_clip = VideoFileClip(input_video_path)
 
             # Ajouter du texte à la vidéo
-            text_clip = TextClip(title, fontsize=70, color='white', font='Helvetica-Bold',
-                                 size=(video_clip.size[0]//4, None), stroke_color='black', stroke_width=1)
-            text_clip = text_clip.set_pos(('center', 60)).set_duration(video_clip.duration)
+            text_clip = TextClip(title, fontsize=70, color='black', font='Helvetica-Bold',
+                                 size=(video_clip.size[0] // 4, None))
+            text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+
+            background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
+            background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
             # Fusionner la vidéo et le texte
-            final_clip = CompositeVideoClip([video_clip, text_clip])
+            final_clip = CompositeVideoClip([video_clip, background_clip, text_clip])
 
             # Écrire la vidéo résultante
             final_clip.write_videofile(output_video_path, codec='libx264', audio_codec='aac', fps=video_clip.fps)
@@ -110,8 +114,11 @@ class VideoEditor:
             start_time = sum(x * int(t) for x, t in zip([60, 1], self.start_time_input.split(":")))
             end_time = sum(x * int(t) for x, t in zip([60, 1], self.end_time_input.split(":")))
 
+            #TODO Si une personne n'a pas d'abonnement mettre cette restriction
+            """
             if (end_time - start_time) > 30:
                 raise ValueError("Erreur: Vous n'avez pas le droit aussi longtemps !")
+            """
 
             # Télécharger la vidéo YouTube
             downloaded_video_path = self.download_youtube_video()
@@ -121,9 +128,8 @@ class VideoEditor:
                 return
 
             # Choisir aléatoirement une vidéo du répertoire "videos"
-            videos_directory = "videos"
-            random_video = random.choice(os.listdir(videos_directory))
-            random_video_path = os.path.join(videos_directory, random_video)
+            random_video = random.choice(os.listdir(VIDEOS_DIRECTORY))
+            random_video_path = os.path.join(VIDEOS_DIRECTORY, random_video)
 
             # Extraire les clips nécessaires des vidéos
             random_filename = self.generate_random_filename()
@@ -135,7 +141,7 @@ class VideoEditor:
             # Supprimer les fichiers temporaires
             self.delete_file(self.VIDEO_PATH)
 
-            print(f"La vidéo résultante a été enregistrée à : edited/{self.PATH}F.mp4")
+            print(f"La vidéo résultante a été enregistrée à : {EDITED_PATH}{self.PATH}F.mp4")
 
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
@@ -154,5 +160,5 @@ if __name__ == "__main__":
     end_time_input = input("Entrez le temps de fin (format MM:SS) : ")
     sous_title_input = input("Entrez si vous voulez les sous titre (oui/non): ")
 
-    video_editor = VideoEditor(titre_video, youtube_url, start_time_input, end_time_input, sous_title_input)
+    video_editor = VideoEditor(titre_video.upper(), youtube_url, start_time_input, end_time_input, sous_title_input)
     video_editor.main()
