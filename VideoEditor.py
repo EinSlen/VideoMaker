@@ -150,7 +150,7 @@ class VideoEditor:
                 random_filename = self.titre_video
             else:
                 random_filename = self.generate_random_filename()
-            output_path = os.path.join(VIDEOS_DIRECTORY, f"{random_filename}.mp4")
+            output_path = os.path.join(EDITED_PATH, f"{random_filename}.mp4")
 
             CONTINUE = True
             while CONTINUE:
@@ -158,6 +158,8 @@ class VideoEditor:
                     output_path = self.add_suffix_to_filename(output_path)
                 else:
                     CONTINUE = False
+
+            output_path = self.add_suffix_to_filename(output_path, VIDEOS_DIRECTORY)
 
             # Ajouter le titre à la vidéo
             self.merge_videos(downloaded_video_path, random_video_path, output_path, start_time, end_time)
