@@ -88,7 +88,14 @@ class VideoEditor:
         clip2.close()
         final_clip.close()
 
-        self.add_text_to_video(output_path, self.titre_video)
+        clip_with_text = self.add_text_to_video(output_path, self.titre_video)
+
+        clip_with_text.write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
+                                   audio_codec='aac')
+
+        clip_with_text.close()
+
+        self.delete_file(output_path)
 
         print("Merge des vidéos avec succès ! ")
 
@@ -107,6 +114,8 @@ class VideoEditor:
             background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
             background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
+            return CompositeVideoClip([video_clip, background_clip, text_clip]).set_fps(video_clip.fps)
+            """
             # Fusionner la vidéo et le texte
             final_clip = CompositeVideoClip([video_clip, background_clip, text_clip])
 
@@ -117,6 +126,7 @@ class VideoEditor:
             final_clip.close()
 
             self.delete_file(input_video_path)
+            """
 
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
