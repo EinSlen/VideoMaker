@@ -32,6 +32,20 @@ class VideoEditor:
         self.PATH = path
         return path
 
+    def add_suffix_to_filename(self, filepath, new_directory=""):
+        if new_directory == "":
+            directory, filename_with_ext = os.path.split(filepath)
+            filename, ext = os.path.splitext(filename_with_ext)
+            suffix = 1
+            new_filename = filename + ext
+            while os.path.exists(os.path.join(directory, new_filename)):
+                new_filename = f"{filename} ({suffix}){ext}"
+                suffix += 1
+            return os.path.join(directory, new_filename)
+
+        directory, filename_with_ext = os.path.split(filepath)
+        return os.path.join(new_directory, filename_with_ext)
+
     def delete_file(self, file_path):
         if os.path.exists(file_path) and file_path != '':
             os.remove(file_path)
@@ -74,11 +88,11 @@ class VideoEditor:
         clip2.close()
         final_clip.close()
 
-        self.add_text_to_video(output_path, EDITED_PATH + self.PATH + "F.mp4", self.titre_video)
+        self.add_text_to_video(output_path, self.titre_video)
 
         print("Merge des vidéos avec succès ! ")
 
-    def add_text_to_video(self, input_video_path, output_video_path, title):
+    def add_text_to_video(self, input_video_path, title):
         try:
             if input_video_path is None or not os.path.exists(input_video_path):
                 raise ValueError("Erreur : Le chemin de la vidéo d'entrée n'est pas valide.")
@@ -97,7 +111,7 @@ class VideoEditor:
             final_clip = CompositeVideoClip([video_clip, background_clip, text_clip])
 
             # Écrire la vidéo résultante
-            final_clip.write_videofile(output_video_path, codec='libx264', audio_codec='aac', fps=video_clip.fps)
+            final_clip.write_videofile(self.add_suffix_to_filename(input_video_path, EDITED_PATH), codec='libx264', audio_codec='aac', fps=video_clip.fps)
 
             # Fermer les ressources
             final_clip.close()
@@ -132,8 +146,18 @@ class VideoEditor:
             random_video_path = os.path.join(VIDEOS_DIRECTORY, random_video)
 
             # Extraire les clips nécessaires des vidéos
-            random_filename = self.generate_random_filename()
-            output_path = os.path.join('edited', f"{random_filename}.mp4")
+            if self.titre_video != '':
+                random_filename = self.titre_video
+            else:
+                random_filename = self.generate_random_filename()
+            output_path = os.path.join(VIDEOS_DIRECTORY, f"{random_filename}.mp4")
+
+            CONTINUE = True
+            while CONTINUE:
+                if os.path.exists(output_path):
+                    output_path = self.add_suffix_to_filename(output_path)
+                else:
+                    CONTINUE = False
 
             # Ajouter le titre à la vidéo
             self.merge_videos(downloaded_video_path, random_video_path, output_path, start_time, end_time)
@@ -141,7 +165,7 @@ class VideoEditor:
             # Supprimer les fichiers temporaires
             self.delete_file(self.VIDEO_PATH)
 
-            print(f"La vidéo résultante a été enregistrée à : {EDITED_PATH}{self.PATH}F.mp4")
+            print(f"La vidéo résultante a été enregistrée à : {self.add_suffix_to_filename(output_path, EDITED_PATH)}")
 
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
@@ -150,15 +174,20 @@ class VideoEditor:
 
 
 
-if __name__ == "__main__":
-    titre_video = input("Entrez le titre de la vidéo YouTube (ou tapez 'quit' pour quitter) : ")
-    if titre_video.lower() == 'quit':
-        print("Programme quitté.")
-        sys.exit()
-    youtube_url = input("Entrez le lien de la vidéo YouTube : ")
-    start_time_input = input("Entrez le temps de début (format MM:SS) : ")
-    end_time_input = input("Entrez le temps de fin (format MM:SS) : ")
-    sous_title_input = input("Entrez si vous voulez les sous titre (oui/non): ")
+def start():
+    CONTINUE = True
+    while CONTINUE:
+        titre_video = input("Entrez le titre de la vidéo YouTube (ou tapez 'quit' pour quitter) : ")
+        if titre_video.lower() == 'quit':
+            print("Programme quitté.")
+            sys.exit()
+        youtube_url = input("Entrez le lien de la vidéo YouTube : ")
+        start_time_input = input("Entrez le temps de début (format MM:SS) : ")
+        end_time_input = input("Entrez le temps de fin (format MM:SS) : ")
+        sous_title_input = input("Entrez si vous voulez les sous titre (oui/non): ")
 
-    video_editor = VideoEditor(titre_video.upper(), youtube_url, start_time_input, end_time_input, sous_title_input)
-    video_editor.main()
+        video_editor = VideoEditor(titre_video.upper(), youtube_url, start_time_input, end_time_input, sous_title_input)
+        CONTINUE = not video_editor.main()
+
+start()
+
