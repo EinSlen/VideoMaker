@@ -46,7 +46,7 @@ class VideoEditor:
     def delete_file(self, file_path):
         if os.path.exists(file_path) and file_path != '':
             try:
-                file_path.close()
+                VideoFileClip(file_path).close()
             except:
                 ""
             os.remove(file_path)
