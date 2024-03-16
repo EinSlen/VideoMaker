@@ -48,7 +48,7 @@ class VideoEditor:
             try:
                 VideoFileClip(file_path).close()
             except:
-                ""
+                print(f"VideoMaker : Impossible de close le fichier : {file_path}")
             os.remove(file_path)
             print(f"Fichier supprimé : {file_path}")
         else:
@@ -205,12 +205,14 @@ class VideoEditor:
 
             CONTINUE = True
             while CONTINUE:
+                print(self.add_suffix_to_filename(output_path, EDITED_PATH))
                 if os.path.exists(output_path):
                     output_path = self.add_suffix_to_filename(output_path)
+                    print("Changement du path : ", output_path)
                 else:
                     CONTINUE = False
 
-            output_path = self.add_suffix_to_filename(output_path, VIDEOS_DIRECTORY)
+            output_path = self.add_suffix_to_filename(output_path, "./")
 
             # Ajouter le titre à la vidéo
             self.merge_videos(random_video_path, output_path, start_time, end_time)
