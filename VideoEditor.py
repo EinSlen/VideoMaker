@@ -7,7 +7,7 @@ from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from moviepy.editor import VideoFileClip, CompositeVideoClip
-#import speech_recognition as sr
+import speech_recognition as sr
 from moviepy.video.fx import all as vfx
 
 VIDEOS_DIRECTORY = "videos/"
@@ -21,17 +21,13 @@ class VideoEditor:
         self.youtube_url = youtube_url
         self.start_time_input = start_time_input
         self.end_time_input = end_time_input
-        self.PATH = ''
+        self.PATH = ''.join(random.choices(string.ascii_letters.upper() + string.digits.upper(), k=12))
         self.VIDEO_PATH = ''
         if sous_title.lower() == "oui":
             self.sous_title = True
         else:
             self.sous_title = False
 
-    def generate_random_filename(self):
-        path = ''.join(random.choices(string.ascii_letters.upper() + string.digits.upper(), k=12))
-        self.PATH = path
-        return path
 
     def add_suffix_to_filename(self, filepath, new_directory=""):
         if new_directory == "":
@@ -49,27 +45,58 @@ class VideoEditor:
 
     def delete_file(self, file_path):
         if os.path.exists(file_path) and file_path != '':
+            try:
+                file_path.close()
+            except:
+                ""
             os.remove(file_path)
             print(f"Fichier supprimé : {file_path}")
         else:
             print(f"Le fichier n'existe pas : {file_path}")
 
     def download_youtube_video(self, output_path='.'):
-        yt = YouTube(self.youtube_url)
         print("Vidéo en cours de téléchargement...")
+        yt = YouTube(self.youtube_url)
         video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
 
         if video_stream:
             video_stream.download(output_path)
             print("Vidéo téléchargée avec succès !")
             self.VIDEO_PATH = os.path.join(output_path, video_stream.default_filename)
-            return self.VIDEO_PATH
         else:
             raise RuntimeError("Votre vidéo n'est pas connu de l'API")
-            return None
 
-    def merge_videos(self, video_path1, video_path2, output_path, start_time, end_time):
-        clip1 = VideoFileClip(video_path1).subclip(start_time, end_time)
+    def add_subtile_to_video(self, input_video_path):
+        try:
+            if input_video_path is None or not os.path.exists(input_video_path):
+                raise ValueError(f"Erreur : Le chemin de la vidéo d'entrée n'est pas valide. -> {input_video_path}")
+
+            video_clip = VideoFileClip(input_video_path)
+            print("VideoMaker: Extraction de la piste audio...")
+            audio = video_clip.audio.to_soundarray(fps=44100)
+
+            print("VideoMaker: Transcription de la parole en texte...")
+            recognizer = sr.Recognizer()
+            audio_transcript = recognizer.recognize_google(audio, language='fr-FR')
+            print("VideoMaker: Transcription terminée.")
+
+            text_clip = TextClip(audio_transcript, fontsize=20, color='white', font='Arial', bg_color='black')
+            text_clip = text_clip.set_position(('center', 'bottom')).set_duration(video_clip.duration)
+
+            video_with_subtitle = CompositeVideoClip([video_clip, text_clip])
+
+            return video_with_subtitle.set_fps(video_clip.fps)
+
+        except Exception as e:
+            if self.titre_video != '':
+                self.delete_file(os.path.join(self.titre_video, "TEMP_MPY_wvf_snd.mp4"))
+            else:
+                self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
+            self.delete_file(self.VIDEO_PATH)
+            print(f"Erreur : {e}")
+
+    def merge_videos(self, video_path2, output_path, start_time, end_time):
+        clip1 = VideoFileClip(self.VIDEO_PATH).subclip(start_time, end_time)
         clip2 = VideoFileClip(video_path2).subclip(start_time, end_time)
 
         clip2 = clip2.set_audio(None)
@@ -82,16 +109,23 @@ class VideoEditor:
 
         final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac', fps=FPS_TIKTOK)
 
-        clip1.close()
-        clip2.close()
         final_clip.close()
 
         clip_with_text = self.add_text_to_video(output_path)
+
+        if self.sous_title:
+            print("VideoMaker : Ajout des sous titres...")
+            clip_with_text = self.add_subtile_to_video(output_path)
+
+
 
         clip_with_text.write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
                                    audio_codec='aac')
 
         clip_with_text.close()
+
+        clip1.close()
+        clip2.close()
 
         self.delete_file(output_path)
 
@@ -150,9 +184,9 @@ class VideoEditor:
             """
 
             # Télécharger la vidéo YouTube
-            downloaded_video_path = self.download_youtube_video()
+            self.download_youtube_video()
 
-            if downloaded_video_path is None:
+            if self.VIDEO_PATH is None:
                 print("VideoMaker : Le téléchargement de la vidéo a échoué.")
                 return False
 
@@ -164,7 +198,9 @@ class VideoEditor:
             if self.titre_video != '':
                 random_filename = self.titre_video
             else:
-                random_filename = self.generate_random_filename()
+                #self.generate_random_filename()
+                random_filename = self.PATH
+
             output_path = os.path.join(EDITED_PATH, f"{random_filename}.mp4")
 
             CONTINUE = True
@@ -177,7 +213,7 @@ class VideoEditor:
             output_path = self.add_suffix_to_filename(output_path, VIDEOS_DIRECTORY)
 
             # Ajouter le titre à la vidéo
-            self.merge_videos(downloaded_video_path, random_video_path, output_path, start_time, end_time)
+            self.merge_videos(random_video_path, output_path, start_time, end_time)
 
             # Supprimer les fichiers temporaires
             self.delete_file(self.VIDEO_PATH)
