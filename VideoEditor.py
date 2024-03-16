@@ -7,6 +7,7 @@ from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from moviepy.editor import VideoFileClip, CompositeVideoClip
+#import speech_recognition as sr
 from moviepy.video.fx import all as vfx
 
 VIDEOS_DIRECTORY = "videos/"
@@ -71,10 +72,7 @@ class VideoEditor:
         clip1 = VideoFileClip(video_path1).subclip(start_time, end_time)
         clip2 = VideoFileClip(video_path2).subclip(start_time, end_time)
 
-        # Couper le son de la deuxième vidéo
         clip2 = clip2.set_audio(None)
-
-        # Ajuster la résolution de la deuxième vidéo pour correspondre à la première
         clip2 = clip2.resize(height=clip1.h)
 
         print("Merge des vidéos... ")
@@ -88,7 +86,7 @@ class VideoEditor:
         clip2.close()
         final_clip.close()
 
-        clip_with_text = self.add_text_to_video(output_path, self.titre_video)
+        clip_with_text = self.add_text_to_video(output_path)
 
         clip_with_text.write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
                                    audio_codec='aac')
@@ -99,22 +97,26 @@ class VideoEditor:
 
         print("Merge des vidéos avec succès ! ")
 
-    def add_text_to_video(self, input_video_path, title):
+    def add_text_to_video(self, input_video_path):
         try:
             if input_video_path is None or not os.path.exists(input_video_path):
-                raise ValueError("Erreur : Le chemin de la vidéo d'entrée n'est pas valide.")
+                raise ValueError(f"Erreur : Le chemin de la vidéo d'entrée n'est pas valide. -> {input_video_path}")
 
             video_clip = VideoFileClip(input_video_path)
 
-            # Ajouter du texte à la vidéo
-            text_clip = TextClip(title, fontsize=70, color='black', font='Helvetica-Bold',
-                                 size=(video_clip.size[0] // 4, None))
-            text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+            if self.titre_video != '':
 
-            background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
-            background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+                text_clip = TextClip(self.titre_video, fontsize=70, color='black', font='Helvetica-Bold',
+                                     size=(video_clip.size[0] // 4, None))
+                text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
-            return CompositeVideoClip([video_clip, background_clip, text_clip]).set_fps(video_clip.fps)
+                background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
+                background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+
+                return CompositeVideoClip([video_clip, background_clip, text_clip]).set_fps(video_clip.fps)
+
+            else:
+                return video_clip.set_fps(video_clip.fps)
             """
             # Fusionner la vidéo et le texte
             final_clip = CompositeVideoClip([video_clip, background_clip, text_clip])
@@ -129,7 +131,10 @@ class VideoEditor:
             """
 
         except Exception as e:
-            self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
+            if self.titre_video != '':
+                self.delete_file(os.path.join(self.titre_video, "TEMP_MPY_wvf_snd.mp4"))
+            else:
+                self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
             self.delete_file(self.VIDEO_PATH)
             print(f"Erreur : {e}")
 
@@ -148,8 +153,8 @@ class VideoEditor:
             downloaded_video_path = self.download_youtube_video()
 
             if downloaded_video_path is None:
-                print("Le téléchargement de la vidéo a échoué.")
-                return
+                print("VideoMaker : Le téléchargement de la vidéo a échoué.")
+                return False
 
             # Choisir aléatoirement une vidéo du répertoire "videos"
             random_video = random.choice(os.listdir(VIDEOS_DIRECTORY))
@@ -177,12 +182,15 @@ class VideoEditor:
             # Supprimer les fichiers temporaires
             self.delete_file(self.VIDEO_PATH)
 
-            print(f"La vidéo résultante a été enregistrée à : {self.add_suffix_to_filename(output_path, EDITED_PATH)}")
+            print(f"VideoMaker: La vidéo résultante a été enregistrée à : {self.add_suffix_to_filename(output_path, EDITED_PATH)}")
+
+            return True
 
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
             self.delete_file(self.VIDEO_PATH)
             print(f"Erreur : {e}")
+            return False
 
 
 
