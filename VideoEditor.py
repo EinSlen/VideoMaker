@@ -4,14 +4,13 @@ import string
 import sys
 import wave
 
-import deepspeech
 import numpy as np
 from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from moviepy.editor import VideoFileClip, CompositeVideoClip
 import speech_recognition as sr
-from moviepy.video.fx import all as vfx
+from pocketsphinx import AudioFile, get_model_path
 
 VIDEOS_DIRECTORY = "videos/"
 RESOLUTION_TIKTOK = (720, 720)
@@ -20,6 +19,8 @@ EDITED_PATH = "edited/"
 LIBRARY_PATH = "./app/lib/"
 PBMM = LIBRARY_PATH + 'output_graph.pbmm'
 SCORER = LIBRARY_PATH + 'kenlm.scorer'
+FRENCH_DICT = LIBRARY_PATH + 'fr.dict'
+LANGUAGE = "fr-FR"
 
 class VideoEditor:
     def __init__(self, titre_video='', youtube_url=None, start_time_input=0, end_time_input=30, sous_title="non"):
@@ -33,10 +34,6 @@ class VideoEditor:
             self.sous_title = True
         else:
             self.sous_title = False
-
-        self.deepspeech_model = deepspeech.Model(PBMM)
-        self.deepspeech_model.enableExternalScorer(SCORER)
-
 
     def add_suffix_to_filename(self, filepath, new_directory=""):
         if new_directory == "":
@@ -85,6 +82,7 @@ class VideoEditor:
             video_clip = VideoFileClip(input_video_path)
             video_clip.audio.write_audiofile(temp_audio_path)
 
+
             print("VideoMaker: Transcription de la parole en texte...")
 
             # Transcrire l'audio en texte
@@ -128,30 +126,18 @@ class VideoEditor:
     def transcribe_audio(self, audio_path):
         try:
             print("VideoMaker : Transcription de l'audio à venir.")
-            with wave.open(audio_path, 'rb') as audio_file:
-                print("VideoMaker : Transcription de l'audio...")
-                sample_width = audio_file.getsampwidth()
-                num_channels = audio_file.getnchannels()
-                sample_rate = audio_file.getframerate()
-                audio_frames = audio_file.readframes(audio_file.getnframes())
+            recognizer = sr.Recognizer()
 
-            # Convertir les données audio en un tableau numpy
-            audio_data = np.frombuffer(audio_frames, dtype=np.int16)
-
-            # Si plusieurs canaux, convertir en mono
-            if num_channels > 1:
-                audio_data = audio_data.reshape(-1, num_channels).mean(axis=1).astype(np.int16)
-
-            # Transcrire l'audio en texte avec DeepSpeech
-            transcript = self.deepspeech_model.stt(audio_data)
+            with sr.AudioFile(audio_path) as source:
+                audio_data = recognizer.record(source)
+                text = recognizer.recognize_sphinx(audio_data, language='fr-FR')
 
             print("VideoMaker : Transcription de l'audio terminée.")
 
-            return transcript
+            return text
 
         except Exception as e:
-            print(f"Erreur lors de la transcription audio : {e}")
-            return None
+            RuntimeError(f"Erreur lors de la transcription audio : {e}")
 
     def merge_videos(self, video_path2, output_path, start_time, end_time):
         clip1 = VideoFileClip(self.VIDEO_PATH).subclip(start_time, end_time)
@@ -221,12 +207,6 @@ class VideoEditor:
             start_time = sum(x * int(t) for x, t in zip([60, 1], self.start_time_input.split(":")))
             end_time = sum(x * int(t) for x, t in zip([60, 1], self.end_time_input.split(":")))
 
-            #TODO Si une personne n'a pas d'abonnement mettre cette restriction
-            """
-            if (end_time - start_time) > 30:
-                raise ValueError("Erreur: Vous n'avez pas le droit aussi longtemps !")
-            """
-
             # Télécharger la vidéo YouTube
             self.download_youtube_video()
 
@@ -242,7 +222,6 @@ class VideoEditor:
             if self.titre_video != '':
                 random_filename = self.titre_video
             else:
-                #self.generate_random_filename()
                 random_filename = self.PATH
 
             output_path = os.path.join(EDITED_PATH, f"{random_filename}.mp4")
@@ -274,8 +253,6 @@ class VideoEditor:
             print(f"Erreur : {e}")
             return False
 
-
-
 def start():
     CONTINUE = True
     while CONTINUE:
@@ -292,4 +269,3 @@ def start():
         CONTINUE = not video_editor.main()
 
 start()
-
