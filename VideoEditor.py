@@ -75,29 +75,47 @@ class VideoEditor:
         else:
             raise RuntimeError("Votre vidéo n'est pas connu de l'API")
 
-    def add_subtile_to_video(self, audio_path):
+    def add_subtitle_to_video(self, input_video_path):
         try:
-            print("VideoMaker : Transcription de l'audio à venir.")
-            with wave.open(audio_path, 'rb') as audio_file:
-                print("VideoMaker : Transcription de l'audio...")
-                sample_width = audio_file.getsampwidth()
-                num_channels = audio_file.getnchannels()
-                sample_rate = audio_file.getframerate()
-                audio_frames = audio_file.readframes(audio_file.getnframes())
+            if input_video_path is None or not os.path.exists(input_video_path):
+                raise ValueError(f"Erreur : Le chemin de la vidéo d'entrée n'est pas valide. -> {input_video_path}")
 
-            # Convertir les données audio en un tableau numpy
-            audio_data = np.frombuffer(audio_frames, dtype=np.int16)
+            # Extraire l'audio de la vidéo
+            temp_audio_path = "temp_audio.wav"
+            video_clip = VideoFileClip(input_video_path)
+            video_clip.audio.write_audiofile(temp_audio_path)
 
-            # Si plusieurs canaux, convertir en mono
-            if num_channels > 1:
-                audio_data = audio_data.reshape(-1, num_channels).mean(axis=1).astype(np.int16)
+            print("VideoMaker: Transcription de la parole en texte...")
 
-            # Transcrire l'audio en texte avec DeepSpeech
-            transcript = self.deepspeech_model.stt(audio_data)
+            # Transcrire l'audio en texte
+            transcript = self.transcribe_audio(temp_audio_path)
 
-            print("VideoMaker : Transcription de l'audio terminée.")
+            # Supprimer le fichier audio temporaire
+            self.delete_file(temp_audio_path)
 
-            return transcript
+            print("VideoMaker: Transcription terminée.")
+
+            if transcript:
+                # Diviser le texte transcrit en phrases
+                sentences = transcript.split('. ')
+
+                print("VideoMaker: Ajout des text en sous titre")
+
+                # Créer des clips texte pour chaque phrase
+                text_clips = []
+                for sentence in sentences:
+                    text_clip = TextClip(sentence, fontsize=20, color='white', font='Arial', bg_color='black')
+                    text_clip = text_clip.set_position(('center', 'bottom')).set_duration(video_clip.duration)
+                    text_clips.append(text_clip)
+
+                # Combinez les clips texte avec le clip vidéo original
+                video_with_subtitles = CompositeVideoClip([video_clip] + text_clips)
+
+                return video_with_subtitles
+
+            else:
+                print("La transcription audio a échoué.")
+                return video_clip
 
         except Exception as e:
             if self.titre_video != '':
@@ -155,16 +173,15 @@ class VideoEditor:
 
         if self.sous_title:
             print("VideoMaker : Ajout des sous titres...")
-            CompositeVideoClip([clip_with_text, self.add_subtile_to_video(output_path)]).write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
-                                   audio_codec='aac')
+            CompositeVideoClip([clip_with_text, self.add_subtitle_to_video(output_path)]).write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264', audio_codec='aac')
         else:
             clip_with_text.write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
                                    audio_codec='aac')
 
-        clip_with_text.close()
 
         clip1.close()
         clip2.close()
+        clip_with_text.close()
 
         self.delete_file(output_path)
 
@@ -186,10 +203,10 @@ class VideoEditor:
                 background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
                 background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
-                return CompositeVideoClip([video_clip, background_clip, text_clip]).set_fps(video_clip.fps)
+                return CompositeVideoClip([video_clip, background_clip, text_clip])
 
             else:
-                return video_clip.set_fps(video_clip.fps)
+                return video_clip
 
         except Exception as e:
             if self.titre_video != '':
