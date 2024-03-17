@@ -2,7 +2,10 @@ import os
 import random
 import string
 import sys
+import wave
 
+import deepspeech
+import numpy as np
 from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array
@@ -14,6 +17,9 @@ VIDEOS_DIRECTORY = "videos/"
 RESOLUTION_TIKTOK = (720, 720)
 FPS_TIKTOK = 60
 EDITED_PATH = "edited/"
+LIBRARY_PATH = "./app/lib/"
+PBMM = LIBRARY_PATH + 'output_graph.pbmm'
+SCORER = LIBRARY_PATH + 'kenlm.scorer'
 
 class VideoEditor:
     def __init__(self, titre_video='', youtube_url=None, start_time_input=0, end_time_input=30, sous_title="non"):
@@ -27,6 +33,9 @@ class VideoEditor:
             self.sous_title = True
         else:
             self.sous_title = False
+
+        self.deepspeech_model = deepspeech.Model(PBMM)
+        self.deepspeech_model.enableExternalScorer(SCORER)
 
 
     def add_suffix_to_filename(self, filepath, new_directory=""):
@@ -66,26 +75,29 @@ class VideoEditor:
         else:
             raise RuntimeError("Votre vidéo n'est pas connu de l'API")
 
-    def add_subtile_to_video(self, input_video_path):
+    def add_subtile_to_video(self, audio_path):
         try:
-            if input_video_path is None or not os.path.exists(input_video_path):
-                raise ValueError(f"Erreur : Le chemin de la vidéo d'entrée n'est pas valide. -> {input_video_path}")
+            print("VideoMaker : Transcription de l'audio à venir.")
+            with wave.open(audio_path, 'rb') as audio_file:
+                print("VideoMaker : Transcription de l'audio...")
+                sample_width = audio_file.getsampwidth()
+                num_channels = audio_file.getnchannels()
+                sample_rate = audio_file.getframerate()
+                audio_frames = audio_file.readframes(audio_file.getnframes())
 
-            video_clip = VideoFileClip(input_video_path)
-            print("VideoMaker: Extraction de la piste audio...")
-            audio = video_clip.audio.to_soundarray(fps=44100)
+            # Convertir les données audio en un tableau numpy
+            audio_data = np.frombuffer(audio_frames, dtype=np.int16)
 
-            print("VideoMaker: Transcription de la parole en texte...")
-            recognizer = sr.Recognizer()
-            audio_transcript = recognizer.recognize_google(audio, language='fr-FR')
-            print("VideoMaker: Transcription terminée.")
+            # Si plusieurs canaux, convertir en mono
+            if num_channels > 1:
+                audio_data = audio_data.reshape(-1, num_channels).mean(axis=1).astype(np.int16)
 
-            text_clip = TextClip(audio_transcript, fontsize=20, color='white', font='Arial', bg_color='black')
-            text_clip = text_clip.set_position(('center', 'bottom')).set_duration(video_clip.duration)
+            # Transcrire l'audio en texte avec DeepSpeech
+            transcript = self.deepspeech_model.stt(audio_data)
 
-            video_with_subtitle = CompositeVideoClip([video_clip, text_clip])
+            print("VideoMaker : Transcription de l'audio terminée.")
 
-            return video_with_subtitle.set_fps(video_clip.fps)
+            return transcript
 
         except Exception as e:
             if self.titre_video != '':
@@ -94,6 +106,34 @@ class VideoEditor:
                 self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
             self.delete_file(self.VIDEO_PATH)
             print(f"Erreur : {e}")
+
+    def transcribe_audio(self, audio_path):
+        try:
+            print("VideoMaker : Transcription de l'audio à venir.")
+            with wave.open(audio_path, 'rb') as audio_file:
+                print("VideoMaker : Transcription de l'audio...")
+                sample_width = audio_file.getsampwidth()
+                num_channels = audio_file.getnchannels()
+                sample_rate = audio_file.getframerate()
+                audio_frames = audio_file.readframes(audio_file.getnframes())
+
+            # Convertir les données audio en un tableau numpy
+            audio_data = np.frombuffer(audio_frames, dtype=np.int16)
+
+            # Si plusieurs canaux, convertir en mono
+            if num_channels > 1:
+                audio_data = audio_data.reshape(-1, num_channels).mean(axis=1).astype(np.int16)
+
+            # Transcrire l'audio en texte avec DeepSpeech
+            transcript = self.deepspeech_model.stt(audio_data)
+
+            print("VideoMaker : Transcription de l'audio terminée.")
+
+            return transcript
+
+        except Exception as e:
+            print(f"Erreur lors de la transcription audio : {e}")
+            return None
 
     def merge_videos(self, video_path2, output_path, start_time, end_time):
         clip1 = VideoFileClip(self.VIDEO_PATH).subclip(start_time, end_time)
@@ -115,11 +155,10 @@ class VideoEditor:
 
         if self.sous_title:
             print("VideoMaker : Ajout des sous titres...")
-            clip_with_text = self.add_subtile_to_video(output_path)
-
-
-
-        clip_with_text.write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
+            CompositeVideoClip([clip_with_text, self.add_subtile_to_video(output_path)]).write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
+                                   audio_codec='aac')
+        else:
+            clip_with_text.write_videofile(self.add_suffix_to_filename(output_path, EDITED_PATH), codec='libx264',
                                    audio_codec='aac')
 
         clip_with_text.close()
@@ -151,18 +190,6 @@ class VideoEditor:
 
             else:
                 return video_clip.set_fps(video_clip.fps)
-            """
-            # Fusionner la vidéo et le texte
-            final_clip = CompositeVideoClip([video_clip, background_clip, text_clip])
-
-            # Écrire la vidéo résultante
-            final_clip.write_videofile(self.add_suffix_to_filename(input_video_path, EDITED_PATH), codec='libx264', audio_codec='aac', fps=video_clip.fps)
-
-            # Fermer les ressources
-            final_clip.close()
-
-            self.delete_file(input_video_path)
-            """
 
         except Exception as e:
             if self.titre_video != '':
