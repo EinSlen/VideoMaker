@@ -301,14 +301,14 @@ class VideoEditor:
 def start():
     CONTINUE = True
     while CONTINUE:
-        titre_video = input("Entrez le titre de la vidéo YouTube (ou tapez 'quit' pour quitter) : ")
+        titre_video = input("VideoMaker : Entrez le titre de la vidéo YouTube (ou tapez 'quit' pour quitter) : ")
         if titre_video.lower() == 'quit':
-            print("Programme quitté.")
+            print("VideoMaker : Programme quitté.")
             sys.exit()
-        youtube_url = input("Entrez le lien de la vidéo YouTube : ")
-        start_time_input = input("Entrez le temps de début (format MM:SS) : ")
-        end_time_input = input("Entrez le temps de fin (format MM:SS) : ")
-        sous_title_input = input("Entrez si vous voulez les sous titre (oui/non): ")
+        youtube_url = input("VideoMaker : Entrez le lien de la vidéo YouTube : ")
+        start_time_input = input("VideoMaker : Entrez le temps de début (format MM:SS) : ")
+        end_time_input = input("VideoMaker : Entrez le temps de fin (format MM:SS) : ")
+        sous_title_input = input("VideoMaker : Entrez si vous voulez les sous titre (oui/non): ")
 
         video_editor = VideoEditor(titre_video.upper(), youtube_url, start_time_input, end_time_input, sous_title_input)
         CONTINUE = not video_editor.main()

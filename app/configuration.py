@@ -8,6 +8,7 @@ PROJET_NAME = os.path.basename(PATH_PARENT)
 PATH_TEMP = os.path.join(PATH_PARENT, 'app', 'TEMP/')
 VIDEOS_DIRECTORY = os.path.join(PATH_PARENT, 'videos/')
 EDITED_PATH = os.path.join(PATH_PARENT, 'edited/')
+LIB_PATH = os.path.join(PATH_PARENT, 'lib/')
 
 LIBRARY_PATH = os.path.join(PATH_PARENT, 'app', 'lib/')
 
