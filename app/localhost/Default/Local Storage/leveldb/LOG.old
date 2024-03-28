@@ -1,0 +1,5 @@
+2024/03/28-21:41:24.203 470 Creating DB C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Local Storage\leveldb since it was missing.
+2024/03/28-21:41:24.254 470 Reusing MANIFEST C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Local Storage\leveldb/MANIFEST-000001
+2024/03/28-21:44:21.857 1c38 Level-0 table #5: started
+2024/03/28-21:44:21.872 1c38 Level-0 table #5: 755798 bytes OK
+2024/03/28-21:44:21.875 1c38 Delete type=0 #3

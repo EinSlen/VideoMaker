@@ -15,7 +15,8 @@ from app.components.SubtitleSrt import SubtitlesGenerator
 import speech_recognition as sr
 from app.configuration import *
 
-from pocketsphinx import AudioFile, get_model_path
+
+#https://github.com/elebumm/RedditVideoMakerBot
 
 from app.lib.video_transcription.main import VideoTranscriber
 

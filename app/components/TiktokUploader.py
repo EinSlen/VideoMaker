@@ -16,7 +16,10 @@ print('=========================================================================
 time.sleep(4)
 print('Running bot now, get ready and login manually...')
 
+#chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\Valentin\Desktop\VideoMaker\app\localhost"
+
 options = webdriver.ChromeOptions()
+options.add_experimental_option("debuggerAddress", "localhost:9222")
 bot = webdriver.Chrome(options=options,  executable_path=CM().install())
 bot.set_window_size(1680, 900)
 
