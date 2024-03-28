@@ -2,10 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-from app.configuration import LIB_PATH
-
-
 class TrendingVideo:
+    def __init__(self):
+        self.trending_videos = []
     def get_trending_videos(self):
         url = "https://www.youtube.com/feed/trending"
 
@@ -34,9 +33,9 @@ class TrendingVideo:
                                     if video_renderer:
                                         video_id = video_renderer['videoId']
                                         title = video_renderer['title']['runs'][0]['text']
-                                        print("Titre:", title)
-                                        print("Video ID:", video_id)
-                                        print()
+                                        self.trending_videos.append((title, video_id))
+                                        print("Trending Video : Ajout video : " + title)
+
 
         else:
             print("Erreur lors de la requête")
@@ -44,3 +43,11 @@ class TrendingVideo:
 
 trending = TrendingVideo()
 trending.get_trending_videos()
+
+"""
+Récupérer les vidéos id et les titles
+for title, video_id in videos:
+    print("Titre:", title)
+    print("Video ID:", video_id)
+    print()
+"""
