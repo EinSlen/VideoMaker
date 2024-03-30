@@ -37,7 +37,7 @@ class TiktokUploader:
             print("TiktokUploader : ", video_path, title)
             self.upload(video_path, title)
             self.video_path_list.pop(0)
-            if len(self.video_path_list) > 1:
+            if len(self.video_path_list) >= 1:
                 self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
 
         self.driver.close()
