@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager as CM
+from selenium.webdriver.chrome.service import Service
 
 print('=====================================================================================================')
 print('Heyy, you have to login manully on tiktok, so the bot will wait you 1 minute for loging in manually!')
@@ -16,11 +17,13 @@ print('=========================================================================
 time.sleep(4)
 print('Running bot now, get ready and login manually...')
 
+#cd C:\Program Files\Google\Chrome\Application
 #chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\Valentin\Desktop\VideoMaker\app\localhost"
 
 options = webdriver.ChromeOptions()
 options.add_experimental_option("debuggerAddress", "localhost:9222")
-bot = webdriver.Chrome(options=options,  executable_path=CM().install())
+service = Service(executable_path=CM().install())
+bot = webdriver.Chrome(options=options, service=service)
 bot.set_window_size(1680, 900)
 
 bot.get('https://www.tiktok.com/login')
@@ -29,9 +32,9 @@ ActionChains(bot).key_down(Keys.CONTROL).send_keys(
 ActionChains(bot).key_down(Keys.CONTROL).send_keys(
     '-').key_up(Keys.CONTROL).perform()
 print('Waiting 50s for manual login...')
-time.sleep(50)
-bot.get('https://www.tiktok.com/upload/?lang=en')
-time.sleep(3)
+time.sleep(5)
+bot.get('https://www.tiktok.com/creator-center/upload?lang=fr')
+time.sleep(5)
 
 
 def check_exists_by_xpath(driver, xpath):
@@ -45,11 +48,20 @@ def check_exists_by_xpath(driver, xpath):
 
 def upload(video_path):
     while True:
-        file_uploader = bot.find_element_by_xpath(
-            '//*[@id="main"]/div[2]/div/div[2]/div[2]/div/div/input')
+        """
+        WebDriverWait(bot, 20).until(EC.element_to_be_clickable(
+            (By.XPATH, "//input[@type='file']"))).send_keys(
+            video_path)
+        """
 
+        iframe = bot.find_element(By.XPATH, "//iframe[@data-tt='Upload_index_iframe']")
+        bot.switch_to.frame(iframe)
+
+        file_uploader = WebDriverWait(bot, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']")))
         file_uploader.send_keys(video_path)
 
+        
         caption = bot.find_element_by_xpath(
             '//*[@id="main"]/div[2]/div/div[2]/div[3]/div[1]/div[1]/div[2]/div/div[1]/div/div/div/div/div/div/span')
 
