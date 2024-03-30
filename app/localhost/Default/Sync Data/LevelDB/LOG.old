@@ -1,2 +1,3 @@
-2024/03/28-21:41:24.112 11c4 Creating DB C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Sync Data\LevelDB since it was missing.
-2024/03/28-21:41:24.171 11c4 Reusing MANIFEST C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Sync Data\LevelDB/MANIFEST-000001
+2024/03/30-14:34:33.556 217c Reusing MANIFEST C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Sync Data\LevelDB/MANIFEST-000001
+2024/03/30-14:34:33.556 217c Recovering log #3
+2024/03/30-14:34:33.556 217c Reusing old log C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Sync Data\LevelDB/000003.log 
