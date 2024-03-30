@@ -98,7 +98,7 @@ class TiktokUploader:
                 ActionChains(self.driver).move_to_element(caption).click(
                     caption).perform()
 
-                ActionChains(self.driver).click()
+                ActionChains(self.driver).move_to_element(caption).click()
                 #ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(
                 #    'v').key_up(Keys.CONTROL).perform()
 
@@ -114,7 +114,7 @@ class TiktokUploader:
                     ActionChains(self.driver).send_keys(Keys.RETURN).perform()
                     time.sleep(0.5)
 
-                time.sleep(2)
+                self.driver.implicitly_wait(2)
                 self.driver.execute_script("window.scrollTo(150, 300);")
 
                 post = WebDriverWait(self.driver, 100).until(
@@ -123,6 +123,7 @@ class TiktokUploader:
 
                 post.click()
                 print("TiktokUploader : La vidéo de " + title + " à été upload.")
+                time.sleep(10)
                 #self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
 
                 """
@@ -150,6 +151,8 @@ class TiktokUploader:
             except NoSuchWindowException as e:
                 print("TiktokUpload : " + e)
                 self.addChrome()
+            except NoSuchElementException:
+                self.login()
 
 path_video = """C:\\Users\Valentin\Desktop\VideoMaker\\app\components\TEST (3).mp4"""
 tiktokuploader = TiktokUploader([(path_video, "TEST")])
