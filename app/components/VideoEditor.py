@@ -23,7 +23,7 @@ from app.lib.video_transcription.main import VideoTranscriber
 
 class VideoEditor:
     def __init__(self, titre_video='', youtube_url=None, start_time_input=0, end_time_input=30, sous_title="non"):
-        self.titre_video = titre_video
+        self.titre_video = titre_video.upper()
         self.youtube_url = youtube_url
         self.start_time_input = start_time_input
         self.end_time_input = end_time_input
@@ -59,17 +59,20 @@ class VideoEditor:
         else:
             print(f"VideoMaker : Le fichier n'existe pas : {file_path}")
 
-    def download_youtube_video(self, output_path='.'):
-        print("VideoMaker : Vidéo en cours de téléchargement...")
-        yt = YouTube(self.youtube_url)
-        video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
+    def download_youtube_video(self, output_path='./'):
+        try:
+            print("VideoMaker : Vidéo en cours de téléchargement...")
+            yt = YouTube(self.youtube_url)
+            video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
 
-        if video_stream:
-            video_stream.download(output_path)
-            print("Vidéo téléchargée avec succès !")
-            self.VIDEO_PATH = os.path.join(output_path, video_stream.default_filename)
-        else:
-            raise RuntimeError("VideoMaker : Votre vidéo n'est pas connu de l'API")
+            if video_stream:
+                video_stream.download(output_path)
+                print("Vidéo téléchargée avec succès !")
+                self.VIDEO_PATH = os.path.join(output_path, video_stream.default_filename)
+            else:
+                raise RuntimeError("VideoMaker : Votre vidéo n'est pas connu de l'API")
+        except Exception as e:
+            raise RuntimeError(f"VideoMaker : {e}")
 
     def add_subtitle_to_video(self, input_video_path):
         try:
@@ -218,7 +221,7 @@ class VideoEditor:
             else:
                 self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
             self.delete_file(self.VIDEO_PATH)
-            print(f"Erreur : {e}")
+            raise RuntimeError(f"Erreur : {e}")
 
     def editor(self):
         try:
@@ -234,8 +237,7 @@ class VideoEditor:
             self.download_youtube_video(PATH_TEMP)
 
             if self.VIDEO_PATH is None:
-                print("VideoMaker : Le téléchargement de la vidéo a échoué.")
-                return False
+                raise RuntimeError("VideoMaker : Le téléchargement de la vidéo a échoué.")
 
             # Choisir aléatoirement une vidéo du répertoire "videos"
             random_video = random.choice(os.listdir(VIDEOS_DIRECTORY))
@@ -272,8 +274,7 @@ class VideoEditor:
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
             self.delete_file(self.VIDEO_PATH)
-            print(f"Erreur : {e}")
-            return False
+            raise RuntimeError(f"Erreur : {e}")
 
     def create_subtitle_clip_from_srt(self, srt_path, video_size):
         subtitle_clips = []
@@ -298,7 +299,7 @@ class VideoEditor:
         if subtitle_clips:
             return CompositeVideoClip(subtitle_clips)
         else:
-            RuntimeError("VideoMaker : Subtitle ne peut pas faire d'opération dessus.")
+            raise RuntimeError("VideoMaker : Subtitle ne peut pas faire d'opération dessus.")
 
 
 def start():
@@ -318,3 +319,6 @@ def start():
             CONTINUE = False
         else:
             CONTINUE = True
+"""
+start()
+"""
