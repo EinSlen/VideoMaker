@@ -14,3 +14,5 @@ app/*.mp4
 
 app/components/*.mp4
 
+./app/localhost
+
