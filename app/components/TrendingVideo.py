@@ -27,7 +27,12 @@ class TrendingVideo:
                         contents = section.get('itemSectionRenderer', {}).get('contents', [])
                         for content in contents:
                             if 'shelfRenderer' in content:
-                                items = content['shelfRenderer']['content']['expandedShelfContentsRenderer']['items']
+                                if 'expandedShelfContentsRenderer' in content['shelfRenderer']['content']:
+                                    items = content['shelfRenderer']['content']['expandedShelfContentsRenderer']['items']
+                                elif 'horizontalListRenderer' in content['shelfRenderer']['content']:
+                                    items = content['shelfRenderer']['content']['horizontalListRenderer']['items']
+                                else:
+                                    print("Trending video not available")
                                 for item in items:
                                     video_renderer = item.get('videoRenderer')
                                     if video_renderer:
@@ -40,12 +45,15 @@ class TrendingVideo:
         else:
             print("Erreur lors de la requête")
 
+        return self.trending_videos
 
-trending = TrendingVideo()
-trending.get_trending_videos()
+
 
 """
-Récupérer les vidéos id et les titles
+trending = TrendingVideo()
+videos = trending.get_trending_videos()
+
+#Récupérer les vidéos id et les titles
 for title, video_id in videos:
     print("Titre:", title)
     print("Video ID:", video_id)

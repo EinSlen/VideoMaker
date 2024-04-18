@@ -1,3 +1,4 @@
+import sys
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -37,7 +38,7 @@ class TiktokUploader:
             print("TiktokUploader : ", video_path, title)
             self.upload(video_path, title)
             self.video_path_list.pop(0)
-            if len(self.video_path_list) > 1:
+            if len(self.video_path_list) >= 1:
                 self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
 
         self.driver.close()
@@ -175,16 +176,28 @@ class TiktokUploader:
 
             time.sleep(1)
             """
-        except (NoSuchWindowException, NoSuchElementException, TimeoutException, ConnectionError) as e:
+        except (NoSuchWindowException, NoSuchElementException, TimeoutException, ConnectionError, Exception) as e:
             if isinstance(e, NoSuchWindowException):
+                self.driver.close()
                 self.driver.quit()
                 self.addChrome()
                 print("TiktokUpload : Aucune chrome window, relancement !")
-            if isinstance(e, NoSuchElementException):
+            elif isinstance(e, NoSuchElementException):
                 self.login()
                 print("TiktokUpload : Aucun Element...")
+            elif isinstance(e, TimeoutException) or isinstance(e, ConnectionError):
+                self.upload(video_path, title)
+            else:
+                print("TiktokUpload : Une autre exception a été levée, fermeture...")
+                print(e)
+                self.driver.close()
+                self.driver.quit()
+                sys.exit()
             self.upload(video_path, title)
 
 
-path_video = """C:\\Users\Valentin\Desktop\VideoMaker\\app\components\TEST (3).mp4"""
+"""
+Utilisation : 
+path_video = "C:\\Users\\Valentin\\Desktop\\VideoMaker\\app\\components\\TEST (3).mp4"
 tiktokuploader = TiktokUploader([(path_video, "TEST")])
+"""

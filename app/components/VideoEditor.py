@@ -220,7 +220,7 @@ class VideoEditor:
             self.delete_file(self.VIDEO_PATH)
             print(f"Erreur : {e}")
 
-    def main(self):
+    def editor(self):
         try:
             if ":" in self.start_time_input:
                 start_time = sum(x * int(t) for x, t in zip([60, 1], self.start_time_input.split(":")))
@@ -263,9 +263,11 @@ class VideoEditor:
             # Ajouter le titre à la vidéo
             self.merge_videos(random_video_path, output_path, start_time, end_time)
 
-            print(f"VideoMaker: La vidéo résultante a été enregistrée à : {self.add_suffix_to_filename(output_path, EDITED_PATH)}")
+            path_finish = self.add_suffix_to_filename(output_path, EDITED_PATH)
 
-            return True
+            print(f"VideoMaker: La vidéo résultante a été enregistrée à : {path_finish}")
+
+            return path_finish
 
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
@@ -312,6 +314,7 @@ def start():
         sous_title_input = input("VideoMaker : Entrez si vous voulez les sous titre (oui/non): ")
 
         video_editor = VideoEditor(titre_video.upper(), youtube_url, start_time_input, end_time_input, sous_title_input)
-        CONTINUE = not video_editor.main()
-
-start()
+        if video_editor.editor() != False:
+            CONTINUE = False
+        else:
+            CONTINUE = True
