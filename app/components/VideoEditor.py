@@ -60,19 +60,16 @@ class VideoEditor:
             print(f"VideoMaker : Le fichier n'existe pas : {file_path}")
 
     def download_youtube_video(self, output_path='./'):
-        try:
-            print("VideoMaker : Vidéo en cours de téléchargement...")
-            yt = YouTube(self.youtube_url)
-            video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
+        print("VideoMaker : Vidéo en cours de téléchargement...")
+        yt = YouTube(self.youtube_url)
+        video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
 
-            if video_stream:
-                video_stream.download(output_path)
-                print("Vidéo téléchargée avec succès !")
-                self.VIDEO_PATH = os.path.join(output_path, video_stream.default_filename)
-            else:
-                raise RuntimeError("VideoMaker : Votre vidéo n'est pas connu de l'API")
-        except Exception as e:
-            raise RuntimeError(f"VideoMaker : {e}")
+        if video_stream:
+            video_stream.download(output_path)
+            print("Vidéo téléchargée avec succès !")
+            self.VIDEO_PATH = os.path.join(output_path, video_stream.default_filename)
+        else:
+            raise RuntimeError("VideoMaker : Votre vidéo n'est pas connu de l'API")
 
     def add_subtitle_to_video(self, input_video_path):
         try:
