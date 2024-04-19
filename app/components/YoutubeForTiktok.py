@@ -55,7 +55,6 @@ class YoutubeForTiktok:
     def start(self):
         self.get_videos_with_title()
         self.videos_with_yt_restriction = self.videos_with_title[:VIDEOS_LIMIT_FOR_YT_TO_TK]
-        print(self.videos_with_yt_restriction)
         self.set_videos_to_format_tiktok()
         self.upload_to_tiktok()
 
