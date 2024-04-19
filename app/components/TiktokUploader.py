@@ -31,15 +31,16 @@ time.sleep(5)
 
 class TiktokUploader:
     def __init__(self, list_video):
-        self.driver = self.addChrome()
+        self.driver = self.getChromeDriver()
         self.video_path_list = list_video
+        self.tentative_upload = 0
 
         for video_path, title in self.video_path_list:
             print("TiktokUploader : ", video_path, title)
             self.upload(video_path, title)
-            self.video_path_list.pop(0)
-            if len(self.video_path_list) >= 1:
-                self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
+            print("TiktokUploader : Video upload complete")
+            self.video_path_list.pop()
+            self.tentative_upload = 0
 
         self.driver.close()
         self.driver.quit()
@@ -64,7 +65,7 @@ class TiktokUploader:
 
         return True
 
-    def addChrome(self):
+    def getChromeDriver(self):
         print("TiktokUploader : Ajout d'une chrome windows")
         os.system(
             f'cd "{CHROME_PATH_EXE}" && start chrome.exe --remote-debugging-port={CHROME_PORT} --user-data-dir="{CHROME_PATH_USER}"')
@@ -73,9 +74,9 @@ class TiktokUploader:
         options.add_argument('--remote-debugging-port=' + str(CHROME_PORT))
         options.add_argument('--user-data-dir=' + CHROME_PATH_USER)
         service = Service(executable_path=CM().install())
-        self.driver = webdriver.Chrome(options=options, service=service)
+        driver = webdriver.Chrome(options=options, service=service)
         print("TiktokUploader : Ajout d'une chrome windows terminé.")
-        return self.driver
+        return driver
 
     def upload(self, video_path, title):
         try:
@@ -86,7 +87,7 @@ class TiktokUploader:
             """
             print("TiktokUpload : Redirection -> creator-center/upload")
             self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
-            self.driver.implicitly_wait(5)
+            time.sleep(5)
 
             iframe = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//iframe[@data-tt='Upload_index_iframe']")))
@@ -107,6 +108,7 @@ class TiktokUploader:
             caption = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input.search-friends"))
             )
+
 
             """
             WebDriverWait(self.driver, 15).until(
@@ -139,7 +141,7 @@ class TiktokUploader:
                 ActionChains(self.driver).send_keys(Keys.RETURN).perform()
                 time.sleep(0.5)
 
-            self.driver.implicitly_wait(2)
+            time.sleep(2)
             self.driver.execute_script("window.scrollTo(150, 300);")
 
             post = WebDriverWait(self.driver, 100).until(
@@ -177,23 +179,33 @@ class TiktokUploader:
             time.sleep(1)
             """
         except (NoSuchWindowException, NoSuchElementException, TimeoutException, ConnectionError, Exception) as e:
-            if isinstance(e, NoSuchWindowException):
-                self.driver.close()
-                self.driver.quit()
-                self.addChrome()
-                print("TiktokUpload : Aucune chrome window, relancement !")
-            elif isinstance(e, NoSuchElementException):
-                self.login()
-                print("TiktokUpload : Aucun Element...")
-            elif isinstance(e, TimeoutException) or isinstance(e, ConnectionError):
-                self.upload(video_path, title)
-            else:
-                print("TiktokUpload : Une autre exception a été levée, fermeture...")
+            self.tentative_upload += 1
+            if self.tentative_upload > TENTATIVE_UPLOAD:
+                print(f'Upload à échouée à {self.tentative_upload} tentatives. Arrêt complet pour cause :')
                 print(e)
                 self.driver.close()
                 self.driver.quit()
                 sys.exit()
-            self.upload(video_path, title)
+            if isinstance(e, NoSuchWindowException):
+                print("TiktokUpload : Aucune chrome window, relancement !")
+                self.driver.close()
+                self.driver.quit()
+                self.driver = self.getChromeDriver()
+                self.upload(video_path, title)
+            elif isinstance(e, NoSuchElementException):
+                print("TiktokUpload : Aucun Element... Vous devez vous relogin...")
+                self.login()
+                self.upload(video_path, title)
+            elif isinstance(e, TimeoutException) or isinstance(e, ConnectionError):
+                print("TiktokUpload : Timeout or Connection Error... Reupload..")
+                print(e)
+                self.upload(video_path, title)
+            else:
+                print("TiktokUpload : Une autre exception a été levée, fermeture ! Erreur :")
+                print(e)
+                self.driver.close()
+                self.driver.quit()
+                sys.exit()
 
 
 """
@@ -201,3 +213,6 @@ Utilisation :
 path_video = "C:\\Users\\Valentin\\Desktop\\VideoMaker\\app\\components\\TEST (3).mp4"
 tiktokuploader = TiktokUploader([(path_video, "TEST")])
 """
+
+path_video = "C:\\Users\\Valentin\\Desktop\\VideoMaker\\videos\\Je suis onze nations – vidéo courte.mp4"
+tiktokuploader = TiktokUploader([(path_video, "TEST")])
