@@ -30,13 +30,14 @@ time.sleep(5)
 
 
 class TiktokUploader:
-    def __init__(self, list_video):
+    def __init__(self, list_video, tags=None):
         self.driver = self.getChromeDriver()
         self.video_path_list = list_video
         self.tentative_upload = 0
+        self.tags = tags
 
         for video_path, title in self.video_path_list:
-            print("TiktokUploader : ", video_path, title)
+            print("TiktokUploader : Vidéo trouvé. ", video_path, title)
             self.upload(video_path, title)
             print("TiktokUploader : Video upload complete")
             self.video_path_list.pop()
@@ -105,16 +106,26 @@ class TiktokUploader:
 
             self.driver.switch_to.frame(iframe_element)
 
+            #afficher la page en cours
+            #print(self.driver.page_source)
+
+            description_element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".public-DraftEditor-content"))
+            )
+
+            description_element.click()
+
+            description_element.send_keys(title + " - ")
+
+            """
             caption = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input.search-friends"))
             )
-
-
-            """
-            WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "div.videoInfo"))
-            )
-            """
+      
+            #WebDriverWait(self.driver, 15).until(
+            #    EC.presence_of_element_located((By.CSS_SELECTOR, "div.videoInfo"))
+            #)
+            
             self.driver.implicitly_wait(10)
             ActionChains(self.driver).move_to_element(caption).click(
                 caption).perform()
@@ -122,20 +133,29 @@ class TiktokUploader:
             ActionChains(self.driver).move_to_element(caption).click()
             # ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(
             #    'v').key_up(Keys.CONTROL).perform()
+            """
 
             time.sleep(0.5)
 
             print("TiktokUpload : Ajout du titre : " + title)
+            """
             ActionChains(self.driver).send_keys(title + " - ").perform()
+            """
 
-            with open(CAPTION, "r") as f:
-                tags = [line.strip() for line in f]
-                print("TiktokUpload : Récupération des tags : " + str(tags))
+            if self.tags is None:
+                with open(CAPTION, "r") as f:
+                    tags = [line.strip() for line in f]
+                    print("TiktokUpload : Récupération des tags : " + str(tags))
+                self.tags = tags
 
-            for tag in tags:
+            for tag in self.tags:
                 print("TiktokUpload : Ajout du tag : " + tag)
+                """
                 ActionChains(self.driver).move_to_element(caption).click(
                     caption).perform()
+                """
+                ActionChains(self.driver).move_to_element(description_element).click(
+                    description_element).perform()
                 ActionChains(self.driver).send_keys(tag).perform()
                 time.sleep(1.5)
                 ActionChains(self.driver).send_keys(Keys.RETURN).perform()
@@ -180,6 +200,7 @@ class TiktokUploader:
             """
         except (NoSuchWindowException, NoSuchElementException, TimeoutException, ConnectionError, Exception) as e:
             self.tentative_upload += 1
+            print('Tentative upload : ', self.tentative_upload)
             if self.tentative_upload > TENTATIVE_UPLOAD:
                 print(f'Upload à échouée à {self.tentative_upload} tentatives. Arrêt complet pour cause :')
                 print(e)
@@ -198,7 +219,6 @@ class TiktokUploader:
                 self.upload(video_path, title)
             elif isinstance(e, TimeoutException) or isinstance(e, ConnectionError):
                 print("TiktokUpload : Timeout or Connection Error... Reupload..")
-                print(e)
                 self.upload(video_path, title)
             else:
                 print("TiktokUpload : Une autre exception a été levée, fermeture ! Erreur :")
@@ -210,9 +230,8 @@ class TiktokUploader:
 
 """
 Utilisation : 
-path_video = "C:\\Users\\Valentin\\Desktop\\VideoMaker\\app\\components\\TEST (3).mp4"
-tiktokuploader = TiktokUploader([(path_video, "TEST")])
-"""
-
 path_video = "C:\\Users\\Valentin\\Desktop\\VideoMaker\\videos\\Je suis onze nations – vidéo courte.mp4"
 tiktokuploader = TiktokUploader([(path_video, "TEST")])
+Options feature : Ajouter des tags autre que de base (prédéfini dans CAPTION.txt)
+tiktokuploader = TiktokUploader([(path_video, "TEST")], ["#humour", "#fyp"])
+"""
