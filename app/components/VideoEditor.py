@@ -158,8 +158,6 @@ class VideoEditor:
             trannscriber.transcribe_video()
             trannscriber.create_video(output_path_with_temp)
 
-        #self.delete_file(self.VIDEO_PATH)
-
         self.delete_folder(PATH_TEMP)
         #self.deplacer_fichiers(PATH_TEMP, EDITED_PATH)
 
