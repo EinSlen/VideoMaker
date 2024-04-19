@@ -29,3 +29,4 @@ CHROME_PATH_EXE = "C:\\Program Files\\Google\\Chrome\\Application"
 #RESET GIT ADD : git gc --prune=now
 
 VIDEOS_LIMIT_FOR_YT_TO_TK = 2
+TENTATIVE_UPLOAD = 5
