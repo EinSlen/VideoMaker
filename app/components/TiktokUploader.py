@@ -76,6 +76,7 @@ class TiktokUploader:
         options.add_argument('--user-data-dir=' + CHROME_PATH_USER)
         service = Service(executable_path=CM().install())
         driver = webdriver.Chrome(options=options, service=service)
+        driver.switch_to.window(driver.current_window_handle)
         print("TiktokUploader : Ajout d'une chrome windows terminé.")
         return driver
 
