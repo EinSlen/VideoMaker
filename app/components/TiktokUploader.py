@@ -66,6 +66,13 @@ class TiktokUploader:
 
         return True
 
+    def delete_file(self, file_path):
+        if os.path.exists(file_path) and file_path != '':
+            os.remove(file_path)
+            print(f"Fichier supprimé : {file_path}")
+        else:
+            print(f"VideoMaker : Le fichier n'existe pas : {file_path}")
+
     def getChromeDriver(self):
         print("TiktokUploader : Ajout d'une chrome windows")
         os.system(
@@ -89,6 +96,7 @@ class TiktokUploader:
             """
             print("TiktokUpload : Redirection -> creator-center/upload")
             self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
+            self.driver.switch_to.window(self.driver.current_window_handle)
             time.sleep(5)
 
             iframe = WebDriverWait(self.driver, 10).until(
@@ -175,6 +183,8 @@ class TiktokUploader:
 
             post.click()
             print("TiktokUploader : La vidéo de " + title + " à été upload.")
+            print("TiktokUploader : Suppression de " + title + " en cours...")
+            self.delete_file(video_path)
             time.sleep(0.5)
 
             """
