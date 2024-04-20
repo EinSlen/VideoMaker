@@ -58,6 +58,8 @@ class YoutubeForTiktok:
         self.set_videos_to_format_tiktok()
         self.upload_to_tiktok()
 
-
+"""
+Utilisation (prend une vidéo tendance et la met sur youtube)
 youtubefortiktok = YoutubeForTiktok()
 youtubefortiktok.start()
+"""
