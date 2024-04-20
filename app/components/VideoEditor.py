@@ -194,9 +194,10 @@ class VideoEditor:
             video_clip = VideoFileClip(input_video_path)
 
             if self.titre_video != '':
-
+                # Calculer la largeur de la zone de texte en fonction de la longueur du titre
+                text_width = min(720, max(300, len(self.titre_video) * 20))
                 text_clip = TextClip(self.titre_video, fontsize=70, color='black', font='Helvetica-Bold',
-                                     size=(video_clip.size[0] // 4, None))
+                                     size=(text_width, None))
                 text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
                 background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
@@ -311,6 +312,5 @@ def VideoEditorStart():
             CONTINUE = False
         else:
             CONTINUE = True
-"""
+
 VideoEditorStart()
-"""
