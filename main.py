@@ -61,6 +61,7 @@ def select_number():
         download_input = input("Oui/Non : ")
         if download_input.lower() == "oui":
             download_videos_from_file()
+    clear_console()
     while True:
         try:
             print(Fore.BLUE)
