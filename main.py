@@ -51,6 +51,7 @@ def download_videos_from_file():
         print(f"Fichier {VIDEOS_ID} introuvable!")
 
 def select_number():
+    print(Fore.WHITE)
     mp4_files = [file for file in os.listdir(VIDEOS_DIRECTORY) if file.endswith(".mp4")]
     if len(mp4_files) == 0:
         print("Aucune vidéo pour éditer à été trouvé...")
@@ -62,6 +63,7 @@ def select_number():
             download_videos_from_file()
     while True:
         try:
+            print(Fore.BLUE)
             print("MENU : ")
             print("1) - Récupérer toutes les vidéos tendances feed YouTube")
             print("2) - Upload une vidéo de YouTube sur TikTok (automatique)")
