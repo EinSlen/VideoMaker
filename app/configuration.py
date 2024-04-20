@@ -1,6 +1,5 @@
 import os
 
-
 file_config = os.path.abspath(__file__)
 PATH_PARENT = os.path.dirname(os.path.dirname(file_config))
 PROJET_NAME = os.path.basename(PATH_PARENT)
@@ -20,7 +19,9 @@ MODEL_PATH = "medium"
 
 CHROME_PORT = 9222
 
-CAPTION = os.path.join(PATH_PARENT, 'app', 'caption.txt')
+CAPTION = os.path.join(PATH_PARENT, 'app', 'highlight', 'caption.txt')
+VIDEOS_ID = os.path.join(PATH_PARENT, 'app', 'highlight', 'videos_id.txt')
+
 CHROME_PATH_USER = os.path.join(PATH_PARENT, 'app', 'localhost/')
 CHROME_PATH_EXE = "C:\\Program Files\\Google\\Chrome\\Application"
 
