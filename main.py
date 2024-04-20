@@ -35,10 +35,10 @@ def select_number():
         try:
             print("MENU : ")
             print("1) - Récupérer toutes les vidéos tendances feed YouTube")
-            print("2) - Upload une vidéo sur YouTube (automatique)")
-            print("3) - Editer une vidéo pour mettre sur tiktok (automatique)")
+            print("2) - Upload une vidéo de YouTube sur TikTok (automatique)")
+            print("3) - Editer une vidéo pour mettre sur TikTok (automatique)")
             print("4) - Sous titrer une vidéo (format tiktok)")
-            print("5) - Envoyer une vidéo YouTube (tendance) vers TikTok")
+            print("5) - Envoyer une vidéo YouTube (tendance) vers TikTok (automatique)")
             print("6) - AUTOMATIQUE UPLOADER YOUTUBE TENDANCE VERS TIKTOK (Chaque 24h)")
             print(Fore.WHITE)
             number = int(input("Veuillez sélectionner un chiffre parmi 1, 2, 3, 4, 5, 6 : "))
