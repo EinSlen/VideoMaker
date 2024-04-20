@@ -297,7 +297,7 @@ class VideoEditor:
             raise RuntimeError("VideoMaker : Subtitle ne peut pas faire d'opération dessus.")
 
 
-def start():
+def VideoEditorStart():
     CONTINUE = True
     while CONTINUE:
         titre_video = input("VideoMaker : Entrez le titre de la vidéo YouTube (ou tapez 'quit' pour quitter) : ")
@@ -315,5 +315,5 @@ def start():
         else:
             CONTINUE = True
 """
-start()
+VideoEditorStart()
 """
