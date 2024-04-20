@@ -18,8 +18,6 @@ FPS_TIKTOK = 60
 
 MODEL_PATH = "medium"
 
-COOKIE_TIKTOK = ""
-
 CHROME_PORT = 9222
 
 CAPTION = os.path.join(PATH_PARENT, 'app', 'caption.txt')
@@ -29,4 +27,5 @@ CHROME_PATH_EXE = "C:\\Program Files\\Google\\Chrome\\Application"
 #RESET GIT ADD : git gc --prune=now
 
 VIDEOS_LIMIT_FOR_YT_TO_TK = 2
+TEMPS_UPLOAD = 1440 #en minute
 TENTATIVE_UPLOAD = 5
