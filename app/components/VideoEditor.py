@@ -1,11 +1,8 @@
-import os
 import random
 import shutil
 import string
 import sys
-import wave
 
-import numpy as np
 from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array

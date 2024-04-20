@@ -2,12 +2,13 @@ import os
 import time
 from colorama import init, Fore
 import schedule
+from pytube import YouTube
 
 from app.components.TiktokUploader import TiktokUploader
 from app.components.TrendingVideo import TrendingVideo
 from app.components.VideoEditor import VideoEditorStart
 from app.components.YoutubeForTiktok import YoutubeForTiktok
-from app.configuration import MODEL_PATH, TEMPS_UPLOAD
+from app.configuration import MODEL_PATH, TEMPS_UPLOAD, VIDEOS_ID, VIDEOS_DIRECTORY
 from app.lib.video_transcription.main import VideoTranscriber
 
 init()
@@ -30,7 +31,35 @@ def execute_youtube_for_tiktok():
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def download_videos_from_file():
+    try:
+        print("Installation des vidéos d'édition...")
+        with open(VIDEOS_ID, 'r') as file:
+            links = file.readlines()
+            for link in links:
+                link = link.strip()  # Supprimer les espaces et les sauts de ligne
+                try:
+
+                    yt = YouTube(link)
+                    stream = yt.streams.get_highest_resolution()
+                    print(f"Téléchargement de {yt.title}...")
+                    stream.download(VIDEOS_DIRECTORY)
+                    print(f"{yt.title} téléchargée avec succès!")
+                except Exception as e:
+                    print(f"Erreur lors du téléchargement de la vidéo à partir du lien {link}: {e}")
+    except FileNotFoundError:
+        print(f"Fichier {VIDEOS_ID} introuvable!")
+
 def select_number():
+    mp4_files = [file for file in os.listdir(VIDEOS_DIRECTORY) if file.endswith(".mp4")]
+    if len(mp4_files) == 0:
+        print("Aucune vidéo pour éditer à été trouvé...")
+        download_videos_from_file()
+    else:
+        print("Des vidéos ont été trouvée pour l'édition. Voulez-vous quand même installer les vidéos ?")
+        download_input = input("Oui/Non : ")
+        if download_input.lower() == "oui":
+            download_videos_from_file()
     while True:
         try:
             print("MENU : ")
