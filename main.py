@@ -21,10 +21,14 @@ for i, char in enumerate(text):
     print(color + char, end="", flush=True)
     time.sleep(0.1)
 print()
+time.sleep(1)
 
 def execute_youtube_for_tiktok():
     youtubefortiktok = YoutubeForTiktok()
     youtubefortiktok.start()
+
+def clear_console():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def select_number():
     while True:
@@ -36,6 +40,7 @@ def select_number():
             print("4) - Sous titrer une vidéo (format tiktok)")
             print("5) - Envoyer une vidéo YouTube (tendance) vers TikTok")
             print("6) - AUTOMATIQUE UPLOADER YOUTUBE TENDANCE VERS TIKTOK (Chaque 24h)")
+            print(Fore.WHITE)
             number = int(input("Veuillez sélectionner un chiffre parmi 1, 2, 3, 4, 5, 6 : "))
             if number == 1:
                 trending = TrendingVideo()
@@ -70,16 +75,17 @@ def select_number():
                 youtubefortiktok.start()
             elif number == 6:
                 execute_youtube_for_tiktok()
+                print("Prochain envoie dans : ", TEMPS_UPLOAD)
                 schedule.every(TEMPS_UPLOAD).minutes.do(execute_youtube_for_tiktok)
                 while True:
                     schedule.run_pending()
                     time.sleep(1)
+                    print("Prochain envoie dans : ", TEMPS_UPLOAD)
             else:
                 print("Choix invalide. Veuillez sélectionner un chiffre valide.")
         except ValueError:
             print("Entrée invalide. Veuillez saisir un chiffre entier.")
-        os.system('clear')
-
+        clear_console()
 
 select_number()
 
