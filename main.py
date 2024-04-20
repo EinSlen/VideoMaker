@@ -75,12 +75,11 @@ def select_number():
                 youtubefortiktok.start()
             elif number == 6:
                 execute_youtube_for_tiktok()
-                print("Prochain envoie dans : ", TEMPS_UPLOAD)
                 schedule.every(TEMPS_UPLOAD).minutes.do(execute_youtube_for_tiktok)
+                print("Prochain envoie dans : ", TEMPS_UPLOAD)
                 while True:
                     schedule.run_pending()
                     time.sleep(1)
-                    print("Prochain envoie dans : ", TEMPS_UPLOAD)
             else:
                 print("Choix invalide. Veuillez sélectionner un chiffre valide.")
         except ValueError:
