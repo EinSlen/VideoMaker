@@ -129,9 +129,13 @@ class VideoEditor:
         clip2 = clip2.resize(height=clip1.h)
 
         print("Merge des vidéos... ")
-        final_clip = clips_array([[clip1], [clip2]])
 
-        final_clip = final_clip.resize(RESOLUTION_TIKTOK)
+        if clip2.w == RESOLUTION_TIKTOK[0]:
+            clip1 = clip1.resize(RESOLUTION_TIKTOK)
+            final_clip = clips_array([[clip1], [clip2]])
+        else:
+            final_clip = clips_array([[clip1], [clip2]])
+            final_clip = final_clip.resize(RESOLUTION_TIKTOK)
 
         final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac', fps=FPS_TIKTOK)
 
@@ -313,4 +317,6 @@ def VideoEditorStart():
         else:
             CONTINUE = True
 
+"""
 VideoEditorStart()
+"""
