@@ -162,9 +162,11 @@ class TiktokUploader:
                 """
                 ActionChains(self.driver).move_to_element(caption).click(
                     caption).perform()
-                """
                 ActionChains(self.driver).move_to_element(description_element).click(
                     description_element).perform()
+                """
+                ActionChains(self.driver).send_keys(Keys.END).perform()
+                time.sleep(0.5)
                 ActionChains(self.driver).send_keys(tag).perform()
                 time.sleep(1.5)
                 ActionChains(self.driver).send_keys(Keys.RETURN).perform()
