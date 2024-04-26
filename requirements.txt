@@ -28,4 +28,5 @@ sys
 wave
 time
 webdriver_manager
+ChromeDriverManager
 hydra
