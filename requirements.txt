@@ -26,3 +26,5 @@ string
 sys
 wave
 time
+webdriver_manager
+hydra
