@@ -21,6 +21,7 @@ from app.lib.video_transcription.main import VideoTranscriber
 class VideoEditor:
     def __init__(self, titre_video='', youtube_url=None, start_time_input=0, end_time_input=30, sous_title="non"):
         self.titre_video = titre_video.upper()
+        self.titre_video = self.titre_video.replace(":", "").replace("|", "").replace(",", "")
         self.youtube_url = youtube_url
         self.start_time_input = start_time_input
         self.end_time_input = end_time_input
@@ -58,12 +59,12 @@ class VideoEditor:
         total_size = stream.filesize
         bytes_downloaded = total_size - bytes_remaining
         percentage = (bytes_downloaded / total_size) * 100
-        print("-------------------", end='')
-        print(f"\rVideoMaker : Téléchargement en cours... ({percentage:.2f}% complet)", end='')
-        print("-------------------",  end='')
+        progress_bar = "[" + "-" * int(percentage / 2) + " " * (50 - int(percentage / 2)) + "]"
+        print("\rVideoMaker : Téléchargement en cours... {} ({:.2f}% complet)".format(progress_bar, percentage), end='',
+              flush=True)
 
     def download_youtube_video(self, output_path='./'):
-        print(f"VideoMaker : Vidéo va être télécharger {self.titre_video}...")
+        print(f"VideoMaker : Vidéo va être télécharger : {self.titre_video}...")
         yt = YouTube(self.youtube_url, on_progress_callback=self.on_progress)
         video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
 
@@ -97,7 +98,7 @@ class VideoEditor:
 
             video_clip = VideoFileClip(input_video_path)
             subtitle_clip = self.create_subtitle_clip_from_srt(PATH_TEMP + srt_path, video_clip.size)
-            
+
             self.delete_file(temp_audio_path)
 
             return CompositeVideoClip([video_clip, subtitle_clip])
@@ -256,7 +257,6 @@ class VideoEditor:
 
             CONTINUE = True
             while CONTINUE:
-                print(self.add_suffix_to_filename(output_path, EDITED_PATH))
                 if os.path.exists(output_path):
                     output_path = self.add_suffix_to_filename(output_path)
                     print("VideoMaker : Changement du path : ", output_path)
@@ -276,6 +276,7 @@ class VideoEditor:
 
         except Exception as e:
             self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
+            self.delete_folder(PATH_TEMP)
             self.delete_file(self.VIDEO_PATH)
             raise RuntimeError(f"Erreur : {e}")
 
