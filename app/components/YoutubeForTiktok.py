@@ -35,7 +35,7 @@ class YoutubeForTiktok:
         except Exception as e:
             print(f"YoutubeForTiktok: Une erreur est survenue dans le vidéo editor :")
             print(e)
-            if 'age restricted' in str(e) or 'WinError' in str(e):
+            if 'age restricted' in str(e) or 'WinError' in str(e) or 'Errno' in str(e):
                 print("YoutubeForTiktok: -> Nouvelle vidéo en cours.")
                 if (self.nb_count_videos_use+VIDEOS_LIMIT_FOR_YT_TO_TK) < len(self.videos_with_title):
                     self.nb_count_videos_use += 1
