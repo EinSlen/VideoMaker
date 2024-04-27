@@ -20,13 +20,14 @@ text = """𝓓𝓥𝓛𝓐𝓓 - TIKTOK UPLOADER"""
 for i, char in enumerate(text):
     color = colors[i % len(colors)]
     print(color + char, end="", flush=True)
-    time.sleep(0.1)
 print()
-time.sleep(1)
 
 def execute_youtube_for_tiktok():
-    youtubefortiktok = YoutubeForTiktok()
-    youtubefortiktok.start()
+    try:
+        youtubefortiktok = YoutubeForTiktok()
+        youtubefortiktok.start()
+    except Exception as e:
+        print(e)
 
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -39,7 +40,6 @@ def download_videos_from_file():
             for link in links:
                 link = link.strip()  # Supprimer les espaces et les sauts de ligne
                 try:
-
                     yt = YouTube(link)
                     stream = yt.streams.get_highest_resolution()
                     print(f"Téléchargement de {yt.title}...")

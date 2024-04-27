@@ -53,20 +53,26 @@ class VideoEditor:
                 print(f"VideoMaker : Impossible de close le fichier : {file_path}")
             os.remove(file_path)
             print(f"Fichier supprimé : {file_path}")
-        else:
-            print(f"VideoMaker : Le fichier n'existe pas : {file_path}")
+
+    def on_progress(self, stream, chunk, bytes_remaining):
+        total_size = stream.filesize
+        bytes_downloaded = total_size - bytes_remaining
+        percentage = (bytes_downloaded / total_size) * 100
+        print("-------------------", end='')
+        print(f"\rVideoMaker : Téléchargement en cours... ({percentage:.2f}% complet)", end='')
+        print("-------------------",  end='')
 
     def download_youtube_video(self, output_path='./'):
-        print("VideoMaker : Vidéo en cours de téléchargement...")
-        yt = YouTube(self.youtube_url)
+        print(f"VideoMaker : Vidéo va être télécharger {self.titre_video}...")
+        yt = YouTube(self.youtube_url, on_progress_callback=self.on_progress)
         video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
 
         if video_stream:
             video_stream.download(output_path)
-            print("Vidéo téléchargée avec succès !")
+            print("\nVidéo téléchargée avec succès !")
             self.VIDEO_PATH = os.path.join(output_path, video_stream.default_filename)
         else:
-            raise RuntimeError("VideoMaker : Votre vidéo n'est pas connu de l'API")
+            raise RuntimeError("VideoMaker : Votre vidéo n'est pas connue de l'API")
 
     def add_subtitle_to_video(self, input_video_path):
         try:
@@ -103,7 +109,7 @@ class VideoEditor:
             else:
                 self.delete_file(os.path.join(self.PATH, "TEMP_MPY_wvf_snd.mp4"))
             self.delete_file(self.VIDEO_PATH)
-            print(f"VideoMaker : Erreur : {e}")
+            raise RuntimeError(f"Erreur : {e}")
 
     def transcribe_audio(self, audio_path):
         try:
@@ -201,7 +207,7 @@ class VideoEditor:
                 # Calculer la largeur de la zone de texte en fonction de la longueur du titre
                 text_width = min(720, max(300, len(self.titre_video) * 20))
                 text_clip = TextClip(self.titre_video, fontsize=70, color='black', font='Helvetica-Bold',
-                                     size=(text_width, None))
+                                     size=(video_clip.size[0] // 4, None))
                 text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
                 background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))

@@ -32,11 +32,11 @@ class YoutubeForTiktok:
                 else:
                     RuntimeError("YoutubeForTiktok: Aucun chemin de vidéo trouvé.")
                     del self.videos_with_yt_restriction[nb_video]
-        except RuntimeError as e:
+        except Exception as e:
             print(f"YoutubeForTiktok: Une erreur est survenue dans le vidéo editor :")
             print(e)
-            if 'age restricted' in str(e):
-                print("YoutubeForTiktok: Video age restrict -> Nouvelle vidéo en cours.")
+            if 'age restricted' in str(e) or 'WinError' in str(e):
+                print("YoutubeForTiktok: -> Nouvelle vidéo en cours.")
                 if (self.nb_count_videos_use+VIDEOS_LIMIT_FOR_YT_TO_TK) < len(self.videos_with_title):
                     self.nb_count_videos_use += 1
                     del self.videos_with_yt_restriction[nb_video]
