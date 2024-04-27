@@ -64,7 +64,7 @@ class VideoEditor:
               flush=True)
 
     def download_youtube_video(self, output_path='./'):
-        print(f"VideoMaker : Vidéo va être télécharger : {self.titre_video}...")
+        print(f"VideoMaker : Cette vidéo va être télécharger : {self.titre_video}...")
         yt = YouTube(self.youtube_url, on_progress_callback=self.on_progress)
         video_stream = yt.streams.filter(file_extension='mp4', res='720p').first()
 
@@ -214,16 +214,21 @@ class VideoEditor:
             video_clip = VideoFileClip(input_video_path)
 
             if self.titre_video != '':
+                #print(TextClip.list('font'))
+                print(f"VideoMaker : Ajout du titre de la vidéo | Font : ({FONT_TEXT})...")
                 # Calculer la largeur de la zone de texte en fonction de la longueur du titre
                 text_width = min(720, max(300, len(self.titre_video) * 20))
-                text_clip = TextClip(self.titre_video, fontsize=70, color='black', font='Helvetica-Bold',
-                                     size=(video_clip.size[0] // 4, None))
+                if len(self.titre_video) < 10:
+                    text_width = text_width//2
+                text_clip = TextClip(self.titre_video, fontsize=140, color=COLOR_TEXT[0], stroke_color=COLOR_TEXT[1], stroke_width=STROKE_SIZE, font=FONT_TEXT,
+                                     size=(text_width, None))
+
                 text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
-                background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
-                background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+                #background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
+                #background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
 
-                return CompositeVideoClip([video_clip, background_clip, text_clip])
+                return CompositeVideoClip([video_clip, text_clip]) #background_clip
 
             else:
                 return video_clip

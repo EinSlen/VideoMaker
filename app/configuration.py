@@ -14,6 +14,9 @@ LANGUAGE = "fr-FR"
 
 RESOLUTION_TIKTOK = (720, 1280)
 FPS_TIKTOK = 60
+FONT_TEXT = 'Arial-Bold-Italic'
+COLOR_TEXT = ('yellow', 'orange')
+STROKE_SIZE = 2
 
 MODEL_PATH = "medium"
 
