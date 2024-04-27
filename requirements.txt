@@ -17,6 +17,7 @@ beautifulsoup4~=4.12.3
 selenium~=4.19.0
 python-dotenv~=1.0.1
 speech_recognition
+SpeechRecognition
 colorama
 json
 os
@@ -27,3 +28,6 @@ string
 sys
 wave
 time
+webdriver_manager
+ChromeDriverManager
+hydra
