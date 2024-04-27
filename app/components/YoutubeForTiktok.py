@@ -1,8 +1,10 @@
+import threading
+
 from app.components.TiktokUploader import TiktokUploader
 from app.components.TrendingVideo import TrendingVideo
 from app.components.VideoEditor import VideoEditor
 from app.configuration import VIDEOS_LIMIT_FOR_YT_TO_TK
-
+from queue import Queue
 
 class YoutubeForTiktok:
     def __init__(self):
@@ -16,6 +18,11 @@ class YoutubeForTiktok:
         videos = trending_videos.get_trending_videos()
         self.videos_with_title = videos
 
+    def process_video_editing(self, title, video_uid, output_queue):
+        video_editor = VideoEditor(title, "https://www.youtube.com/watch?v=" + video_uid, str(0), str(60), 'non')
+        path_video_edited = video_editor.editor()
+        output_queue.put(path_video_edited)
+
     def set_videos_to_format_tiktok(self):
         global nb_video
         try:
@@ -23,9 +30,13 @@ class YoutubeForTiktok:
             nb_video = -1
             for title, video_uid in self.videos_with_yt_restriction:
                 nb_video +=1
-                video_editor = VideoEditor(title, "https://www.youtube.com/watch?v="+video_uid, str(0), str(60),
-                                           'non')
-                path_video_edited = video_editor.editor()
+                output_queue = Queue()
+                edit_thread = threading.Thread(target=self.process_video_editing,
+                                               args=(title, video_uid, output_queue))
+                edit_thread.start()
+                edit_thread.join()
+
+                path_video_edited = output_queue.get()
                 if "C:\\" in path_video_edited:
                     self.videos_with_format_tiktok.append((path_video_edited, title))
                     del self.videos_with_yt_restriction[nb_video]
@@ -63,3 +74,5 @@ Utilisation (prend une vidéo tendance et la met sur youtube)
 youtubefortiktok = YoutubeForTiktok()
 youtubefortiktok.start()
 """
+youtubefortiktok = YoutubeForTiktok()
+youtubefortiktok.start()

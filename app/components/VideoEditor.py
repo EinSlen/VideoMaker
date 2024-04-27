@@ -2,6 +2,7 @@ import random
 import shutil
 import string
 import sys
+import threading
 
 from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
@@ -252,7 +253,11 @@ class VideoEditor:
             else:
                 end_time = int(self.end_time_input)
 
-            self.download_youtube_video(PATH_TEMP)
+            #self.download_youtube_video(PATH_TEMP)
+            download_thread = threading.Thread(target=self.download_youtube_video, args=(PATH_TEMP,))
+            download_thread.start()
+
+            download_thread.join()
 
             if self.VIDEO_PATH is None:
                 raise RuntimeError("VideoMaker : Le téléchargement de la vidéo a échoué.")
@@ -272,6 +277,7 @@ class VideoEditor:
             CONTINUE = True
             while CONTINUE:
                 if os.path.exists(output_path):
+                    print("VideoMaker : Fichier déjà éditer !")
                     output_path = self.add_suffix_to_filename(output_path)
                     print("VideoMaker : Changement du path : ", output_path)
                 else:
@@ -280,7 +286,13 @@ class VideoEditor:
             output_path = self.add_suffix_to_filename(output_path, PATH_TEMP)
 
             # Ajouter le titre à la vidéo
-            self.merge_videos(random_video_path, output_path, start_time, end_time)
+            #self.merge_videos(random_video_path, output_path, start_time, end_time)
+            merge_thread = threading.Thread(target=self.merge_videos,
+                                            args=(random_video_path, output_path, start_time,
+                                                 end_time))
+            merge_thread.start()
+
+            merge_thread.join()
 
             path_finish = self.add_suffix_to_filename(output_path, EDITED_PATH)
 
@@ -330,13 +342,16 @@ def VideoEditorStart():
         youtube_url = input("VideoMaker : Entrez le lien de la vidéo YouTube : ")
         start_time_input = input("VideoMaker : Entrez le temps de début (format MM:SS) : ")
         end_time_input = input("VideoMaker : Entrez le temps de fin (format MM:SS) : ")
-        sous_title_input = input("VideoMaker : Entrez si vous voulez les sous titre (oui/non): ")
+        sous_title_input = input("VideoMaker : Entrez si vous voulez les sous-titres (oui/non): ")
 
         video_editor = VideoEditor(titre_video.upper(), youtube_url, start_time_input, end_time_input, sous_title_input)
-        if video_editor.editor() != False:
+        editor_thread = threading.Thread(target=video_editor.editor)
+        editor_thread.start()
+        editor_thread.join()
+
+        if video_editor.VIDEO_PATH:
             CONTINUE = False
-        else:
-            CONTINUE = True
 
-
+"""
 VideoEditorStart()
+"""

@@ -111,7 +111,6 @@ def select_number():
                 print("Prochain envoie dans : ", TEMPS_UPLOAD)
                 while True:
                     schedule.run_pending()
-                    time.sleep(1)
             else:
                 print("Choix invalide. Veuillez sélectionner un chiffre valide.")
         except ValueError:
