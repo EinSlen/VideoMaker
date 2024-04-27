@@ -75,6 +75,11 @@ class VideoEditor:
         else:
             raise RuntimeError("VideoMaker : Votre vidéo n'est pas connue de l'API")
 
+    def resizeVideo(self, vid_list):
+        for vid in vid_list:
+            vid.resize(0.5).crop(x1=176, x2=784)
+        return vid_list
+
     def add_subtitle_to_video(self, input_video_path):
         try:
             if input_video_path is None or not os.path.exists(input_video_path):
@@ -137,10 +142,16 @@ class VideoEditor:
 
         print("Merge des vidéos... ")
 
+        clip1 = self.resizeVideo(clip1)
+
         if clip2.w == RESOLUTION_TIKTOK[0]:
+            clip1, clip2 = self.resizeVideo([clip1, clip2])
             clip1 = clip1.resize(RESOLUTION_TIKTOK)
             final_clip = clips_array([[clip1], [clip2]])
+            final_clip = final_clip.resize(RESOLUTION_TIKTOK)
         else:
+            clip1, clip2 = self.resizeVideo([clip1, clip2])
+            clip1, clip2 = clip1.resize(RESOLUTION_TIKTOK), clip2.resize(RESOLUTION_TIKTOK)
             final_clip = clips_array([[clip1], [clip2]])
             final_clip = final_clip.resize(RESOLUTION_TIKTOK)
 
@@ -324,6 +335,5 @@ def VideoEditorStart():
         else:
             CONTINUE = True
 
-"""
+
 VideoEditorStart()
-"""
