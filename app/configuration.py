@@ -12,7 +12,7 @@ LIBRARY_PATH = os.path.join(PATH_PARENT, 'app', 'lib/')
 
 LANGUAGE = "fr-FR"
 
-RESOLUTION_TIKTOK = (720, 720)
+RESOLUTION_TIKTOK = (720, 1280)
 FPS_TIKTOK = 60
 
 MODEL_PATH = "medium"
