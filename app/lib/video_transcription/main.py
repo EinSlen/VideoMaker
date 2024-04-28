@@ -95,9 +95,15 @@ class VideoTranscriber:
         asp = width / height
         N_frames = 0
 
-        # Charger une police prenant en charge les caractères accentués
         font_path = FONT_PATH
-        font = ImageFont.truetype(font_path, 35)  # Vous pouvez ajuster la taille de police selon vos besoins
+        font_size = 45
+        font = ImageFont.truetype(font_path, font_size)
+
+        def approximate_text_size(text, font):
+            num_chars = len(text)
+            text_width = num_chars * font_size * 0.6  # Ajustez ce coefficient selon vos besoins
+            text_height = font_size
+            return (text_width, text_height)
 
         while True:
             ret, frame = cap.read()
@@ -113,16 +119,22 @@ class VideoTranscriber:
                     pil_frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     draw = ImageDraw.Draw(pil_frame)
 
-                    # Dessiner du texte non-ASCII sur l'image
-                    draw.text((30, 30), text, font=font,
-                              fill=(255, 255, 255))  # Remplacez (255, 255, 255) par la couleur de votre choix
+                    # Obtenir la taille approximative du texte
+                    text_size = approximate_text_size(text, font)
 
-                    for dx in range(-2, 3):
-                        for dy in range(-2, 3):
-                            if abs(dx) + abs(dy) < 5:
-                                draw.text((30 + dx, 30 + dy), text, font=font, fill=(0, 0, 255))
+                    # Calculer les coordonnées de départ du texte pour le placer au centre
+                    text_x = (frame.shape[1] - width)
+                    text_y = (frame.shape[0] - text_size[1]) // 1.5
 
-                    # Reconvertir en format OpenCV
+                    # Dessiner du texte en blanc
+                    for dx in range(-1, 2):
+                        for dy in range(-1, 2):
+                            if abs(dx) + abs(dy) < 2:
+                                draw.text((text_x + dx, text_y + dy), text, font=font, fill=(0, 0, 255))
+
+                        # Dessiner le texte principal
+                    draw.text((text_x, text_y), text, font=font, fill=(255, 255, 255))
+
                     frame = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
 
                     break
