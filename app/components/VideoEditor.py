@@ -8,7 +8,7 @@ from pytube import YouTube
 from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from moviepy.editor import VideoFileClip, CompositeVideoClip
-from app.components.SubtitleSrt import SubtitlesGenerator
+#from app.components.SubtitleSrt import SubtitlesGenerator
 
 import speech_recognition as sr
 from app.configuration import *
@@ -20,7 +20,7 @@ from app.lib.video_transcription.main import VideoTranscriber
 
 
 class VideoEditor:
-    def __init__(self, titre_video='', youtube_url=None, start_time_input=0, end_time_input=30, sous_title="non"):
+    def __init__(self, titre_video='', youtube_url=None, start_time_input=str(0), end_time_input=str(30), sous_title="non"):
         self.titre_video = titre_video.upper()
         self.titre_video = self.titre_video.replace(":", "").replace("|", "").replace(",", "")
         self.youtube_url = youtube_url
@@ -217,25 +217,20 @@ class VideoEditor:
             if self.titre_video != '':
                 print(f"VideoMaker : Ajout du titre de la vidéo | Font : ({FONT_TEXT})...")
 
-                # Calculer la largeur de la zone de texte en fonction de la longueur du titre
                 text_width = min(720, max(300, len(self.titre_video) * 20))
                 if len(self.titre_video) < 10:
-                    text_width = text_width // 10
+                    text_width = text_width // 2
 
-                # Diviser le texte en plusieurs lignes si nécessaire
                 max_chars_per_line = 30  # Nombre maximal de caractères par ligne
                 lines = [self.titre_video[i:i + max_chars_per_line] for i in
                          range(0, len(self.titre_video), max_chars_per_line)]
                 formatted_text = '\n'.join(lines)
 
-                # Créer le clip de texte avec une taille de police plus petite et moins d'espacement
                 text_clip = TextClip(formatted_text, fontsize=80, color=COLOR_TEXT[0], stroke_color=COLOR_TEXT[1],
                                      stroke_width=2, font=FONT_TEXT, size=(text_width, None), align='center')
 
-                # Centrer le texte et définir sa durée sur celle de la vidéo
                 text_clip = text_clip.set_position(('center', 'center')).set_duration(video_clip.duration)
 
-                # Retourner le CompositeVideoClip
                 return CompositeVideoClip([video_clip, text_clip])
 
             else:

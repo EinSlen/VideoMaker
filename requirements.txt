@@ -21,6 +21,9 @@ SpeechRecognition
 colorama
 json
 os
+cv2
+PIL
+tqdm
 schedule
 random
 shutil

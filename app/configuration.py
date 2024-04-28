@@ -15,10 +15,12 @@ LANGUAGE = "fr-FR"
 RESOLUTION_TIKTOK = (720, 1280)
 FPS_TIKTOK = 60
 FONT_TEXT = 'Arial-Bold-Italic'
+FONT_PATH = os.path.join(PATH_PARENT, 'app', 'highlight', 'Arial.ttf')
 COLOR_TEXT = ('yellow', 'orange')
 STROKE_SIZE = 2
 
-MODEL_PATH = "medium"
+MODEL_PATH = os.path.join(LIBRARY_PATH, 'vosk-model-small-fr-0.22')
+MODEL = "medium"
 
 CHROME_PORT = 9222
 
