@@ -1,8 +1,11 @@
+import numpy as np
 import whisper
 import os
 import shutil
 import cv2
+from PIL import ImageDraw, Image, ImageFont
 from moviepy.editor import ImageSequenceClip, AudioFileClip, VideoFileClip
+from app.configuration import *
 from tqdm import tqdm
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -23,7 +26,8 @@ class VideoTranscriber:
     def transcribe_video(self):
         print('Transcribing video')
         result = self.model.transcribe(self.audio_path)
-        text = result["segments"][0]["text"]
+        print(result)
+        text = result["text"]
         textsize = cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)[0]
         cap = cv2.VideoCapture(self.video_path)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -91,6 +95,10 @@ class VideoTranscriber:
         asp = width / height
         N_frames = 0
 
+        # Charger une police prenant en charge les caractères accentués
+        font_path = FONT_PATH
+        font = ImageFont.truetype(font_path, 35)  # Vous pouvez ajuster la taille de police selon vos besoins
+
         while True:
             ret, frame = cap.read()
             if not ret:
@@ -101,10 +109,22 @@ class VideoTranscriber:
             for i in self.text_array:
                 if N_frames >= i[1] and N_frames <= i[2]:
                     text = i[0]
-                    text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2)
-                    text_x = int((frame.shape[1] - text_size[0]) / 2)
-                    text_y = int(height / 2)
-                    cv2.putText(frame, text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
+
+                    pil_frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    draw = ImageDraw.Draw(pil_frame)
+
+                    # Dessiner du texte non-ASCII sur l'image
+                    draw.text((30, 30), text, font=font,
+                              fill=(255, 255, 255))  # Remplacez (255, 255, 255) par la couleur de votre choix
+
+                    for dx in range(-2, 3):
+                        for dy in range(-2, 3):
+                            if abs(dx) + abs(dy) < 5:
+                                draw.text((30 + dx, 30 + dy), text, font=font, fill=(0, 0, 255))
+
+                    # Reconvertir en format OpenCV
+                    frame = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
+
                     break
 
             cv2.imwrite(os.path.join(output_folder, str(N_frames) + ".jpg"), frame)
