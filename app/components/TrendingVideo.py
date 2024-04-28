@@ -38,10 +38,9 @@ class TrendingVideo:
                                     if video_renderer:
                                         video_id = video_renderer['videoId']
                                         title = video_renderer['title']['runs'][0]['text']
-                                        self.trending_videos.append((title, video_id))
-                                        print("Trending Video : Ajout video : " + title)
-
-
+                                        channel_name = video_renderer['shortBylineText']['runs'][0]['text']
+                                        self.trending_videos.append((title, video_id, channel_name))
+                                        print(f"Trending Video : Ajout video ({video_id}) : " + title + " Par " + channel_name)
         else:
             print("Erreur lors de la requête")
 
@@ -59,3 +58,5 @@ for title, video_id in videos:
     print("Video ID:", video_id)
     print()
 """
+trending = TrendingVideo()
+videos = trending.get_trending_videos()

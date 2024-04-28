@@ -354,5 +354,6 @@ def VideoEditorStart():
         if video_editor.VIDEO_PATH:
             CONTINUE = False
 
-
+"""
 VideoEditorStart()
+"""

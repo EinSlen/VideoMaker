@@ -28,7 +28,7 @@ class YoutubeForTiktok:
         try:
             print(f"YoutubeForTiktok: Editor for : {self.videos_with_yt_restriction}")
             nb_video = -1
-            for title, video_uid in self.videos_with_yt_restriction:
+            for title, video_uid, channel_name in self.videos_with_yt_restriction:
                 nb_video +=1
                 output_queue = Queue()
                 edit_thread = threading.Thread(target=self.process_video_editing,
@@ -38,7 +38,7 @@ class YoutubeForTiktok:
 
                 path_video_edited = output_queue.get()
                 if "C:\\" in path_video_edited:
-                    self.videos_with_format_tiktok.append((path_video_edited, title))
+                    self.videos_with_format_tiktok.append((path_video_edited, title, channel_name))
                     del self.videos_with_yt_restriction[nb_video]
                 else:
                     RuntimeError("YoutubeForTiktok: Aucun chemin de vidéo trouvé.")

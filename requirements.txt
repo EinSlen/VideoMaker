@@ -24,6 +24,7 @@ os
 cv2
 PIL
 tqdm
+unicodedata
 schedule
 random
 shutil

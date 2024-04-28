@@ -12,6 +12,7 @@ from selenium.webdriver.chrome.service import Service
 from app.configuration import *
 from selenium.common.exceptions import NoSuchWindowException, TimeoutException
 from requests.exceptions import ConnectionError
+import unicodedata
 
 # cd C:\Program Files\Google\Chrome\Application
 # chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\Valentin\Desktop\VideoMaker\app\localhost"
@@ -30,18 +31,29 @@ time.sleep(5)
 
 
 class TiktokUploader:
-    def __init__(self, list_video, tags=None):
+    def __init__(self, list_video):
         self.driver = self.getChromeDriver()
         self.video_path_list = list_video
         self.tentative_upload = 0
-        self.tags = tags
+        self.tags = None
 
-        for video_path, title in self.video_path_list:
-            print("TiktokUploader : Vidéo trouvé. ", video_path, title)
-            self.upload(video_path, title)
-            print("TiktokUploader : Video upload complete")
-            self.video_path_list.pop()
-            self.tentative_upload = 0
+        print(self.video_path_list)
+
+        if len(self.video_path_list[0]) == 3:
+            for video_path, title, channel in self.video_path_list:
+                self.tags = [channel]
+                print("TiktokUploader : Vidéo trouvé. ", video_path, title)
+                self.upload(video_path, title)
+                print("TiktokUploader : Video upload complete")
+                self.video_path_list.pop()
+                self.tentative_upload = 0
+        else:
+            for video_path, title in self.video_path_list:
+                print("TiktokUploader : Vidéo trouvé. ", video_path, title)
+                self.upload(video_path, title)
+                print("TiktokUploader : Video upload complete")
+                self.video_path_list.pop()
+                self.tentative_upload = 0
 
         self.driver.close()
         self.driver.quit()
@@ -86,6 +98,13 @@ class TiktokUploader:
         driver.switch_to.window(driver.current_window_handle)
         print("TiktokUploader : Ajout d'une chrome windows terminé.")
         return driver
+
+    def preprocess_tag(self, input_string):
+        input_string = input_string.lower()
+        input_string = ''.join(char for char in unicodedata.normalize('NFD', input_string)
+                               if unicodedata.category(char) != 'Mn')
+        input_string = input_string.replace(" ", "").replace(".", "").replace("|", "").replace("?", "").replace("!", "")
+        return '#'+input_string
 
     def upload(self, video_path, title):
         try:
@@ -151,13 +170,11 @@ class TiktokUploader:
             ActionChains(self.driver).send_keys(title + " - ").perform()
             """
 
-            if self.tags is None:
-                with open(CAPTION, "r") as f:
-                    tags = [line.strip() for line in f]
-                    print("TiktokUpload : Récupération des tags : " + str(tags))
-                self.tags = tags
+            with open(CAPTION, "r") as f:
+                tags = [line.strip() for line in f]
+                print("TiktokUpload : Récupération des tags : " + str(tags))
 
-            for tag in self.tags:
+            for tag in tags:
                 print("TiktokUpload : Ajout du tag : " + tag)
                 """
                 ActionChains(self.driver).move_to_element(caption).click(
@@ -171,6 +188,23 @@ class TiktokUploader:
                 time.sleep(1.5)
                 ActionChains(self.driver).send_keys(Keys.RETURN).perform()
                 time.sleep(0.5)
+
+            if self.tags is not None:
+                for tag in self.tags:
+                    tag = self.preprocess_tag(tag)
+                    print("TiktokUpload : Ajout du tag : " + tag)
+                    """
+                    ActionChains(self.driver).move_to_element(caption).click(
+                        caption).perform()
+                    ActionChains(self.driver).move_to_element(description_element).click(
+                        description_element).perform()
+                    """
+                    ActionChains(self.driver).send_keys(Keys.END).perform()
+                    time.sleep(0.5)
+                    ActionChains(self.driver).send_keys(tag).perform()
+                    time.sleep(1.5)
+                    ActionChains(self.driver).send_keys(Keys.RETURN).perform()
+                    time.sleep(0.5)
 
             time.sleep(2)
             self.driver.execute_script("window.scrollTo(150, 300);")
