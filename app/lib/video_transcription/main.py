@@ -123,17 +123,22 @@ class VideoTranscriber:
                     text_size = approximate_text_size(text, font)
 
                     # Calculer les coordonnées de départ du texte pour le placer au centre
-                    text_x = (frame.shape[1] - width)
-                    text_y = (frame.shape[0] - text_size[1]) // 1.5
+                    text_x = (frame.shape[1] - width//1.5)
+                    text_y = (frame.shape[0] - text_size[1] * 2) // 1.5
 
-                    # Dessiner du texte en blanc
+                    max_chars_per_line = len(text) // 2
+                    first_line = text[:max_chars_per_line].rstrip()
+                    second_line = text[max_chars_per_line:].lstrip()
+
                     for dx in range(-1, 2):
                         for dy in range(-1, 2):
                             if abs(dx) + abs(dy) < 2:
-                                draw.text((text_x + dx, text_y + dy), text, font=font, fill=(0, 0, 255))
+                                draw.multiline_text((text_x, text_y), first_line + '\n' + second_line, font=font, fill=(0, 0, 255),
+                                                    align="center")
 
-                        # Dessiner le texte principal
-                    draw.text((text_x, text_y), text, font=font, fill=(255, 255, 255))
+                    # Dessiner le texte sur deux lignes
+                    draw.multiline_text((text_x, text_y), first_line + '\n' + second_line, font=font,
+                                        fill=(255, 255, 255), align="center")
 
                     frame = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
 
