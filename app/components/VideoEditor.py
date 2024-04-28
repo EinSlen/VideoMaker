@@ -215,21 +215,28 @@ class VideoEditor:
             video_clip = VideoFileClip(input_video_path)
 
             if self.titre_video != '':
-                #print(TextClip.list('font'))
                 print(f"VideoMaker : Ajout du titre de la vidéo | Font : ({FONT_TEXT})...")
+
                 # Calculer la largeur de la zone de texte en fonction de la longueur du titre
                 text_width = min(720, max(300, len(self.titre_video) * 20))
                 if len(self.titre_video) < 10:
-                    text_width = text_width//2
-                text_clip = TextClip(self.titre_video, fontsize=140, color=COLOR_TEXT[0], stroke_color=COLOR_TEXT[1], stroke_width=STROKE_SIZE, font=FONT_TEXT,
-                                     size=(text_width, None))
+                    text_width = text_width // 10
 
-                text_clip = text_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+                # Diviser le texte en plusieurs lignes si nécessaire
+                max_chars_per_line = 30  # Nombre maximal de caractères par ligne
+                lines = [self.titre_video[i:i + max_chars_per_line] for i in
+                         range(0, len(self.titre_video), max_chars_per_line)]
+                formatted_text = '\n'.join(lines)
 
-                #background_clip = ColorClip(size=(text_clip.w, text_clip.h), color=(255, 255, 255))
-                #background_clip = background_clip.set_pos(('center', 'center')).set_duration(video_clip.duration)
+                # Créer le clip de texte avec une taille de police plus petite et moins d'espacement
+                text_clip = TextClip(formatted_text, fontsize=80, color=COLOR_TEXT[0], stroke_color=COLOR_TEXT[1],
+                                     stroke_width=2, font=FONT_TEXT, size=(text_width, None), align='center')
 
-                return CompositeVideoClip([video_clip, text_clip]) #background_clip
+                # Centrer le texte et définir sa durée sur celle de la vidéo
+                text_clip = text_clip.set_position(('center', 'center')).set_duration(video_clip.duration)
+
+                # Retourner le CompositeVideoClip
+                return CompositeVideoClip([video_clip, text_clip])
 
             else:
                 return video_clip
@@ -352,6 +359,5 @@ def VideoEditorStart():
         if video_editor.VIDEO_PATH:
             CONTINUE = False
 
-"""
+
 VideoEditorStart()
-"""
