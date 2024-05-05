@@ -1,7 +1,11 @@
+import re
 import threading
 
+import requests
+from bs4 import BeautifulSoup
+
 from app.components.TiktokUploader import TiktokUploader
-from app.components.TrendingVideo import TrendingVideo
+from app.components.TrendingVideo import TrendingVideo, get_video_length
 from app.components.VideoEditor import VideoEditor
 from app.configuration import VIDEOS_LIMIT_FOR_YT_TO_TK
 from queue import Queue
@@ -19,9 +23,38 @@ class YoutubeForTiktok:
         self.videos_with_title = videos
 
     def process_video_editing(self, title, video_uid, output_queue):
-        video_editor = VideoEditor(title, "https://www.youtube.com/watch?v=" + video_uid, str(0), str(60), 'non')
-        path_video_edited = video_editor.editor()
-        output_queue.put(path_video_edited)
+        youtube_url = "https://www.youtube.com/watch?v=" + video_uid
+        video_duration_youtube = get_video_length(youtube_url)
+
+        if "Erreur" not in video_duration_youtube:
+            minutes, seconds = map(int, video_duration_youtube.split(':'))
+            total_video_seconds = minutes * 60 + seconds
+
+            segment_length = 60  # Durée de chaque segment en secondes
+            total_segments = total_video_seconds // segment_length
+            remainder_seconds = total_video_seconds % segment_length
+            if remainder_seconds >= 30:
+                total_segments += 1
+
+            for part in range(total_segments):
+                start_time = part * segment_length
+                end_time = min((part + 1) * segment_length, total_video_seconds)
+
+                video_editor = VideoEditor(title + " - Part " + str(part + 1), youtube_url,
+                                           str(start_time), str(end_time), 'oui')
+                path_video_edited = video_editor.editor()
+                output_queue.put(path_video_edited)
+
+            if remainder_seconds >= 30:
+                video_editor = VideoEditor(title + " - Part final", youtube_url,
+                                           str(total_video_seconds - remainder_seconds), str(total_video_seconds),
+                                           'oui')
+                path_video_edited = video_editor.editor()
+                output_queue.put(path_video_edited)
+        else:
+            video_editor = VideoEditor(title, youtube_url, str(0), str(60), 'oui')
+            path_video_edited = video_editor.editor()
+            output_queue.put(path_video_edited)
 
     def set_videos_to_format_tiktok(self):
         global nb_video
@@ -46,7 +79,7 @@ class YoutubeForTiktok:
         except Exception as e:
             print(f"YoutubeForTiktok: Une erreur est survenue dans le vidéo editor :")
             print(e)
-            if 'age restricted' in str(e) or 'WinError' in str(e) or 'Errno' in str(e):
+            if 'age restricted' in str(e) or 'WinError' in str(e) or 'Errno' in str(e) or 'disconnect' in str(e):
                 print("YoutubeForTiktok: -> Nouvelle vidéo en cours.")
                 if (self.nb_count_videos_use+VIDEOS_LIMIT_FOR_YT_TO_TK) < len(self.videos_with_title):
                     self.nb_count_videos_use += 1
@@ -74,5 +107,3 @@ Utilisation (prend une vidéo tendance et la met sur youtube)
 youtubefortiktok = YoutubeForTiktok()
 youtubefortiktok.start()
 """
-youtubefortiktok = YoutubeForTiktok()
-youtubefortiktok.start()

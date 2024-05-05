@@ -47,6 +47,7 @@ class TiktokUploader:
                 print("TiktokUploader : Video upload complete")
                 self.video_path_list.pop()
                 self.tentative_upload = 0
+                time.sleep(2)
         else:
             for video_path, title in self.video_path_list:
                 print("TiktokUploader : Vidéo trouvé. ", video_path, title)
@@ -54,6 +55,7 @@ class TiktokUploader:
                 print("TiktokUploader : Video upload complete")
                 self.video_path_list.pop()
                 self.tentative_upload = 0
+                time.sleep(2)
 
         self.driver.close()
         self.driver.quit()
@@ -219,7 +221,7 @@ class TiktokUploader:
 
             post.click()
             print("TiktokUploader : La vidéo de " + title + " à été upload.")
-            print("TiktokUploader : Suppression de " + title + " en cours...")
+            #print("TiktokUploader : Suppression de " + title + " en cours...")
             self.delete_file(video_path)
             time.sleep(0.5)
 

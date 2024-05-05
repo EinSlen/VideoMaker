@@ -1,3 +1,5 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -46,6 +48,22 @@ class TrendingVideo:
 
         return self.trending_videos
 
+def get_video_length(video_url):
+    response = requests.get(video_url)
+    if response.status_code == 200:
+        html_content = response.text
+        # Utilisation d'expressions régulières pour extraire la durée de la vidéo
+        match = re.search(r'lengthSeconds\":\"(\d+)', html_content)
+        if match:
+            length_seconds = int(match.group(1))
+            minutes = length_seconds // 60
+            seconds = length_seconds % 60
+            return f"{minutes}:{seconds:02}"
+        else:
+            return "Erreur : durée non disponible"
+    else:
+        return "Erreur lors de la requête"
+
 
 
 """
@@ -58,5 +76,3 @@ for title, video_id in videos:
     print("Video ID:", video_id)
     print()
 """
-trending = TrendingVideo()
-videos = trending.get_trending_videos()
