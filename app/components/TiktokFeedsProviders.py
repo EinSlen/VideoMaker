@@ -54,17 +54,27 @@ class TiktokUploader:
                     video_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/video/']")
                     for video_link in video_links:
                         len_video_feed = len(self.videos_link_feeds)
-                        if(len_video_feed <= self.len):
-                            href = video_link.get_attribute('href')
-                            self.videos_link_feeds.append(href)
-                            print(f"TikTokFeedsProviders: Nouveau lien video trouvé ({href}) [{len_video_feed}/{self.len}]")
+                        if(len_video_feed >= self.len):
+                            break
+                        href = video_link.get_attribute('href')
+                        self.videos_link_feeds.append(href)
+                        print(f"TikTokFeedsProviders: Nouveau lien video trouvé ({href}) [{len_video_feed+1}/{self.len}]")
 
                 except Exception as e:
                     print(f"Erreur lors de la récupération des vidéos pour le lien {lien}: {e}")
         #self.videos_link_feeds.pop(-1)
-        self.driver.close()
-        self.driver.quit()
-        print("TiktokUploader : Driver quit")
+        try:
+            self.driver.close()
+            self.driver.quit()
+            print("TiktokUploader : Driver quit")
+            return self.videos_link_feeds if len(self.videos_link_feeds) > 0 else None
+        except Exception as e:
+            if len(self.videos_link_feeds) > 0:
+                return self.videos_link_feeds
+            if "disconnected" not in str(e):
+                print(f"Erreur lors de la suppression du driver : {e}")
+                return None
+
 
 trending = TiktokUploader(TRENDING_FILE_PATH)
 videos = trending.getProvideTiktokFeeds()
