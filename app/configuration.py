@@ -35,3 +35,5 @@ CHROME_PATH_EXE = "C:\\Program Files\\Google\\Chrome\\Application"
 VIDEOS_LIMIT_FOR_YT_TO_TK = 2
 TEMPS_UPLOAD = 1440 #en minute
 TENTATIVE_UPLOAD = 5
+
+TRENDING_FILE_PATH = os.path.join(PATH_PARENT, 'trending_feeds.txt')
