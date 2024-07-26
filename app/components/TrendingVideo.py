@@ -35,6 +35,7 @@ class TrendingVideo:
                                     items = content['shelfRenderer']['content']['horizontalListRenderer']['items']
                                 else:
                                     print("Trending video not available")
+                                    return []
                                 for item in items:
                                     video_renderer = item.get('videoRenderer')
                                     if video_renderer:
@@ -67,8 +68,8 @@ def get_video_length(video_url):
 
 
 """
-trending = TrendingVideo()
-videos = trending.get_trending_videos()
+trending.txt = TrendingVideo()
+videos = trending.txt.get_trending_videos()
 
 #Récupérer les vidéos id et les titles
 for title, video_id in videos:
