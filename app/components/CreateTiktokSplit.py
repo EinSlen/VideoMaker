@@ -11,18 +11,21 @@ from moviepy.video.compositing.CompositeVideoClip import clips_array
 from pytube import YouTube
 
 from app.components.TiktokFeedsProviders import TiktokFeedsProviders
+from app.components.TiktokUploader import TiktokUploader
 from app.configuration import *
 import requests
 
 class CreateTiktokSplit:
-    def __init__(self, link_length = 1):
+    def __init__(self, link_length = 1, upload_tiktok = False):
         tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, link_length)
         self.list_main_video = tiktokFeedsProviders.getProvideTiktokFeeds()
         self.list_part_video = tiktokFeedsProviders.getVideosLinkFeeds()
+        self.tiktok_link_for_upload = []
         self.output_video_path = EDITED_PATH
+        self.is_upload_tiktok = upload_tiktok
 
     def download_dynamic_video(self, lien, output_path):
-        link = None
+        link, title = None, None
 
         def download_tiktok_video(url, output_dir):
             try:
@@ -39,9 +42,10 @@ class CreateTiktokSplit:
                     info_dict = ydl.extract_info(url, download=True)
                     video_id = info_dict.get('id', 'video')
                     video_file = os.path.join(output_dir, f'{video_id}.mp4')
+                    user_video = self.extract_video_user_name_from_tiktok_link(url)
 
                 print(f"Vidéo téléchargée avec succès : {video_file}")
-                return video_file
+                return video_file, user_video.lower()
 
             except Exception as e:
                 print(f"Erreur lors du téléchargement de la vidéo : {e}")
@@ -54,20 +58,20 @@ class CreateTiktokSplit:
             if video_stream:
                 video_stream.download(output_path)
                 print("\nVidéo téléchargée avec succès !")
-                return os.path.join(output_path, video_stream.default_filename)
+                return os.path.join(output_path, video_stream.default_filename), video_stream.default_filename.lower()
             else:
                 raise RuntimeError("VideoMaker : Votre vidéo n'est pas connue de l'API")
 
         if "tiktok.com" in lien:
-            link = download_tiktok_video(lien, output_path)
+            link, title = download_tiktok_video(lien, output_path)
         elif "youtube.com" in lien:
-            link = download_youtube_video(lien, output_path)
-        return link
+            link, title = download_youtube_video(lien, output_path)
+        return link, title
 
-    def extract_video_id(self, url):
-        # Regex pour capturer l'identifiant vidéo dans l'URL
-        match = re.search(r'/video/(\d+)', url)
-        if match:
+    def extract_video_user_name_from_tiktok_link(self, url):
+        match = re.search(r'tiktok\.com/@([a-zA-Z0-9._]+)', url)
+
+        if match :
             # Renvoie l'identifiant de la vidéo
             return match.group(1)
         else:
@@ -101,7 +105,7 @@ class CreateTiktokSplit:
 
         for link_video in self.list_main_video:
 
-            path_main_video = self.download_dynamic_video(link_video, PATH_TEMP)
+            path_main_video, title = self.download_dynamic_video(link_video, PATH_TEMP)
             # Charger la vidéo principale
             main_video = VideoFileClip(path_main_video)
 
@@ -122,7 +126,7 @@ class CreateTiktokSplit:
                         return
 
                     choose_part_video = random.choice(self.list_part_video)
-                    secondary_video_path = self.download_dynamic_video(choose_part_video, PATH_TEMP)
+                    secondary_video_path = self.download_dynamic_video(choose_part_video, PATH_TEMP)[0]
 
                     # Charger la vidéo secondaire
                     secondary_video = VideoFileClip(secondary_video_path)
@@ -142,6 +146,7 @@ class CreateTiktokSplit:
                         # Sauvegarder le résultat
                         output_filename = os.path.join(EDITED_PATH, f"combined_video_{index}.mp4")
                         combined_clip.write_videofile(output_filename)
+                        self.tiktok_link_for_upload.append([output_filename, title])
 
                         index += 1
 
@@ -151,8 +156,12 @@ class CreateTiktokSplit:
             finally:
                 main_video.close()
                 self.remove_all_files_in_directory(PATH_TEMP)
+                if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
+                    TiktokUploader(self.tiktok_link_for_upload)
 
 """
-createTiktokSplit = CreateTiktokSplit() # on a un argument optionnel (la taille des liens de la liste de base c'est 1 lien)  CreateTiktokSplit(5)
+createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
+createTiktokSplit = CreateTiktokSplit(1, False) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit.split_video()
