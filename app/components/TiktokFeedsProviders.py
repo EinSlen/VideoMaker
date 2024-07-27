@@ -66,6 +66,8 @@ class TiktokFeedsProviders:
         for lien in tiktok_links:
             try:
                 self.driver.get(lien)
+                if len(self.videos_link_feeds) >= self.len:
+                    break
 
                 # Attendre que les vidéos soient chargées
                 time.sleep(2)
