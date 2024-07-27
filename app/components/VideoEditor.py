@@ -11,6 +11,8 @@ from moviepy.editor import VideoFileClip, CompositeVideoClip
 #from app.components.SubtitleSrt import SubtitlesGenerator
 
 import speech_recognition as sr
+
+from app.components.SubtitleSrt import SubtitlesGenerator
 from app.configuration import *
 
 
