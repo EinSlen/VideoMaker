@@ -1,5 +1,6 @@
 import time
 import os
+import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -32,43 +33,65 @@ class TiktokFeedsProviders:
         return driver
 
     def getProvideTiktokFeeds(self):
-        # Charger le fichier contenant les liens TikTok
+        # Charger le fichier contenant les liens TikTok et YouTube
         with open(self.tiktok_link, 'r') as file:
             liens = file.readlines()
 
         if len(liens) == 0:
-            print('TikTokFeedsProviders : No link provided')
+            print('TikTokFeedsProviders : file provided is empty')
+            return None
 
+        tiktok_links = []
+        youtube_links = []
+
+        # Séparer les liens TikTok et YouTube
         for lien in liens:
             lien = lien.strip()
+            print(lien)
             if lien == "":
                 break
             if "tiktok.com" in lien:
-                try:
-                    self.driver.get(lien)
-
-                    # Attendre que les vidéos soient chargées (ajustez la condition selon la page)
-                    time.sleep(2)
-                    WebDriverWait(self.driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='/video/']"))
-                    )
-
-                    # Trouver les liens vidéo
-                    video_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/video/']")
-                    for video_link in video_links:
-                        len_video_feed = len(self.videos_link_feeds)
-                        if len_video_feed >= self.len:
-                            break
-                        href = video_link.get_attribute('href')
-                        self.videos_link_feeds.append(href)
-                        print(f"TikTokFeedsProviders: Nouveau lien video trouvé ({href}) [{len_video_feed+1}/{self.len}]")
-
-                except Exception as e:
-                    print(f"Erreur lors de la récupération des vidéos pour le lien {lien}: {e}")
-            #TODO faire le système avec youtube
+                tiktok_links.append(lien)
             elif "youtube.com" in lien:
-                pass
-        #self.videos_link_feeds.pop(-1)
+                youtube_links.append(lien)
+
+        print(tiktok_links)
+
+        if len(tiktok_links) == 0 and len(youtube_links) == 0:
+            print('TikTokFeedsProviders : No TikTok/Youtube links found')
+            return None
+
+        # Mélanger les liens TikTok/Youtube
+        random.shuffle(tiktok_links)
+        random.shuffle(youtube_links)
+
+        # Traiter les liens TikTok mélangés
+        for lien in tiktok_links:
+            try:
+                self.driver.get(lien)
+
+                # Attendre que les vidéos soient chargées
+                time.sleep(2)
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='/video/']"))
+                )
+
+                # Trouver les liens vidéo
+                video_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/video/']")
+                for video_link in video_links:
+                    if len(self.videos_link_feeds) >= self.len:
+                        break
+                    href = video_link.get_attribute('href')
+                    self.videos_link_feeds.append(href)
+                    print(
+                        f"TikTokFeedsProviders: Nouveau lien video trouvé ({href}) [{len(self.videos_link_feeds)}/{self.len}]")
+
+            except Exception as e:
+                print(f"Erreur lors de la récupération des vidéos pour le lien {lien}: {e}")
+
+        # Vous pouvez ajouter une logique pour traiter les liens YouTube ici, si nécessaire
+        # TODO: Implémenter le traitement des liens YouTube
+
         try:
             self.driver.close()
             self.driver.quit()
@@ -106,3 +129,5 @@ downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des 
 print(videos)
 print(downloadVideo2part)
 """
+trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 10)
+print(trending.getProvideTiktokFeeds())
