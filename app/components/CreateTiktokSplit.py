@@ -16,10 +16,12 @@ from app.configuration import *
 import requests
 
 #PATH FOR THE NEW TIKTOK UPLOADER SUBMODULE
+# lien du submodule : https://github.com/makiisthenes/TiktokAutoUploader
 OUPUT_FOR_THE_NEW_UPLOAD = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/VideosDirPath')
+COOKIE_SESSION_DIRECTORY = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/CookiesDir')
 TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
 USER_CONFIG_NAME = 'dvlad'
-TAGS = ""
+TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
 
 class CreateTiktokSplit:
     def __init__(self, link_length = 1, upload_tiktok = False):
@@ -166,10 +168,35 @@ class CreateTiktokSplit:
                 if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
                     for link, title in self.tiktok_link_for_upload:
                         self.upload_to_tiktok(link, title)
+                self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
 
     def upload_to_tiktok(self, link, title):
         try:
             os.chdir(TiktokAutoUploader_DIR)
+
+            def check_files_for_string_in_name(directory, search_string):
+                # Parcourt tous les fichiers dans le répertoire spécifié
+                for filename in os.listdir(directory):
+                    # Vérifie si le nom du fichier contient la chaîne recherchée
+                    if search_string in filename:
+                        print(f'Cookie de {USER_CONFIG_NAME} est enregistré.')
+                        return True
+                print(f'Cookie de {USER_CONFIG_NAME} n\'est pas enregistré.')
+                return False
+
+            if not check_files_for_string_in_name(COOKIE_SESSION_DIRECTORY, USER_CONFIG_NAME):
+                commande = [
+                    "python",
+                    "cli.py",
+                    "login",
+                    "-n",
+                    "{}".format(USER_CONFIG_NAME),
+                ]
+
+                resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
+                print(f"Sortie standard : {resultat.stdout}")
+                print(f"Sortie d'erreur : {resultat.stderr}")
+
             # Commande à exécuter
             commande = [
                 "python",
@@ -180,14 +207,12 @@ class CreateTiktokSplit:
                 "-v",
                 "{}".format(link),
                 "-t",
-                "{} {}".format(title, TAGS)
+                "{} - {}".format(title, TAGS)
             ]
 
             resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
             print(f"Sortie standard : {resultat.stdout}")
             print(f"Sortie d'erreur : {resultat.stderr}")
-
-            self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
 
         except Exception as e:
             print(str(e))
@@ -197,5 +222,5 @@ class CreateTiktokSplit:
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(3, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
