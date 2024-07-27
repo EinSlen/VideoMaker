@@ -9,7 +9,7 @@ from webdriver_manager.chrome import ChromeDriverManager as CM
 from app.configuration import *
 
 
-class TiktokUploader:
+class TiktokFeedsProviders:
     def __init__(self, tiktok_link, len=10):
         self.driver = self.getChromeDriver()
         self.tiktok_link = tiktok_link
@@ -100,7 +100,7 @@ class TiktokUploader:
         return self.extra_video_links if len(self.extra_video_links) > 0 else None
 
 """
-trending = TiktokUploader(TRENDING_FILE_PATH, 10) première option lien du fichier, deuxième nombre de vidéo récupérer
+trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 10) première option lien du fichier, deuxième nombre de vidéo récupérer
 videos = trending.getProvideTiktokFeeds() #Récupérer les vidéos des tiktok des gens avec uniquement leur lien de profil
 downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des tiktok / youtube de lien dans la deuxième partie du fichier pour download
 print(videos)

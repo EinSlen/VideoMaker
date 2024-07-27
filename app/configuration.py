@@ -14,6 +14,7 @@ LANGUAGE = "fr-FR"
 
 RESOLUTION_TIKTOK = (720, 1280)
 FPS_TIKTOK = 60
+TIKTOK_TEMPS_VIDEO = 63 #63 secondes correspond à 1 minute 03
 FONT_TEXT = 'Arial-Bold-Italic'
 FONT_PATH = os.path.join(PATH_PARENT, 'app', 'highlight', 'Arial.ttf')
 COLOR_TEXT = ('yellow', 'orange')
