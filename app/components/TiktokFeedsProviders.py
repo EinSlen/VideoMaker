@@ -86,6 +86,9 @@ class TiktokUploader:
 
         start_collecting = False
 
+        if len(liens) == 0:
+            print('TikTokFeedsProviders : No link provided')
+
         for lien in liens:
             lien = lien.strip()
             if start_collecting:
@@ -94,7 +97,7 @@ class TiktokUploader:
             elif lien == "":  # Commence à collecter après la ligne vide
                 start_collecting = True
 
-        return self.extra_video_links
+        return self.extra_video_links if len(self.extra_video_links) > 0 else None
 
 """
 trending = TiktokUploader(TRENDING_FILE_PATH, 10) première option lien du fichier, deuxième nombre de vidéo récupérer
