@@ -86,7 +86,6 @@ class TiktokFeedsProviders:
             except Exception as e:
                 print(f"Erreur lors de la récupération des vidéos pour le lien {lien}: {e}")
 
-        # Vous pouvez ajouter une logique pour traiter les liens YouTube ici, si nécessaire
         # TODO: Implémenter le traitement des liens YouTube
 
         try:
