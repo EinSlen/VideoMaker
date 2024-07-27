@@ -47,15 +47,12 @@ class TiktokFeedsProviders:
         # Séparer les liens TikTok et YouTube
         for lien in liens:
             lien = lien.strip()
-            print(lien)
             if lien == "":
                 break
             if "tiktok.com" in lien:
                 tiktok_links.append(lien)
             elif "youtube.com" in lien:
                 youtube_links.append(lien)
-
-        print(tiktok_links)
 
         if len(tiktok_links) == 0 and len(youtube_links) == 0:
             print('TikTokFeedsProviders : No TikTok/Youtube links found')
@@ -129,5 +126,3 @@ downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des 
 print(videos)
 print(downloadVideo2part)
 """
-trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 10)
-print(trending.getProvideTiktokFeeds())
