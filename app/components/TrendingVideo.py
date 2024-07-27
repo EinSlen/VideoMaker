@@ -68,8 +68,8 @@ def get_video_length(video_url):
 
 
 """
-trending.txt = TrendingVideo()
-videos = trending.txt.get_trending_videos()
+trending = TrendingVideo()
+videos = trending.get_trending_videos()
 
 #Récupérer les vidéos id et les titles
 for title, video_id in videos:
