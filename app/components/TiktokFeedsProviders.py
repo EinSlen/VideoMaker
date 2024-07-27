@@ -99,6 +99,7 @@ class TiktokFeedsProviders:
             if "disconnected" not in str(e):
                 print(f"Erreur lors de la suppression du driver : {e}")
                 return None
+
     def getVideosLinkFeeds(self):
         with open(self.tiktok_link, 'r') as file:
             liens = file.readlines()
