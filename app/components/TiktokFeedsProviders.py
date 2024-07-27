@@ -39,6 +39,11 @@ class TiktokFeedsProviders:
 
         if len(liens) == 0:
             print('TikTokFeedsProviders : file provided is empty')
+            try:
+                self.driver.close()
+                self.driver.quit()
+            except:
+                pass
             return None
 
         tiktok_links = []
@@ -49,13 +54,18 @@ class TiktokFeedsProviders:
             lien = lien.strip()
             if lien == "":
                 break
-            if "tiktok.com" in lien:
+            if "tiktok.com" in lien and not lien.startswith("#"):
                 tiktok_links.append(lien)
-            elif "youtube.com" in lien:
+            elif "youtube.com" in lien and not lien.startswith("#"):
                 youtube_links.append(lien)
 
         if len(tiktok_links) == 0 and len(youtube_links) == 0:
             print('TikTokFeedsProviders : No TikTok/Youtube links found')
+            try:
+                self.driver.close()
+                self.driver.quit()
+            except:
+                pass
             return None
 
         # Mélanger les liens TikTok/Youtube
@@ -122,7 +132,7 @@ class TiktokFeedsProviders:
         return self.extra_video_links if len(self.extra_video_links) > 0 else None
 
 """
-trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 10) première option lien du fichier, deuxième nombre de vidéo récupérer
+trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 10) #première option lien du fichier, deuxième nombre de vidéo récupérer
 videos = trending.getProvideTiktokFeeds() #Récupérer les vidéos des tiktok des gens avec uniquement leur lien de profil
 downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des tiktok / youtube de lien dans la deuxième partie du fichier pour download
 print(videos)
