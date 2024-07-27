@@ -5,7 +5,7 @@ import shutil
 import time
 
 import yt_dlp
-
+import subprocess
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from pytube import YouTube
@@ -14,6 +14,12 @@ from app.components.TiktokFeedsProviders import TiktokFeedsProviders
 from app.components.TiktokUploader import TiktokUploader
 from app.configuration import *
 import requests
+
+#PATH FOR THE NEW TIKTOK UPLOADER SUBMODULE
+OUPUT_FOR_THE_NEW_UPLOAD = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/VideosDirPath')
+TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
+USER_CONFIG_NAME = 'dvlad'
+TAGS = ""
 
 class CreateTiktokSplit:
     def __init__(self, link_length = 1, upload_tiktok = False):
@@ -144,9 +150,10 @@ class CreateTiktokSplit:
                         combined_clip = clips_array([[segment, secondary_video]])
 
                         # Sauvegarder le résultat
-                        output_filename = os.path.join(EDITED_PATH, f"combined_video_{index}.mp4")
+                        output_filename_base = f"combined_video_{index}.mp4"
+                        output_filename = os.path.join(OUPUT_FOR_THE_NEW_UPLOAD, output_filename_base)
                         combined_clip.write_videofile(output_filename)
-                        self.tiktok_link_for_upload.append([output_filename, title])
+                        self.tiktok_link_for_upload.append([output_filename_base, title])
 
                         index += 1
 
@@ -157,11 +164,38 @@ class CreateTiktokSplit:
                 main_video.close()
                 self.remove_all_files_in_directory(PATH_TEMP)
                 if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
-                    TiktokUploader(self.tiktok_link_for_upload)
+                    for link, title in self.tiktok_link_for_upload:
+                        self.upload_to_tiktok(link, title)
+
+    def upload_to_tiktok(self, link, title):
+        try:
+            os.chdir(TiktokAutoUploader_DIR)
+            # Commande à exécuter
+            commande = [
+                "python",
+                "cli.py",
+                "upload",
+                "--user",
+                "{}".format(USER_CONFIG_NAME),
+                "-v",
+                "{}".format(link),
+                "-t",
+                "{} {}".format(title, TAGS)
+            ]
+
+            resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
+            print(f"Sortie standard : {resultat.stdout}")
+            print(f"Sortie d'erreur : {resultat.stderr}")
+
+            self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
+
+        except Exception as e:
+            print(str(e))
+
 
 """
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, False) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(1, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
