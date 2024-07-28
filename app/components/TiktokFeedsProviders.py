@@ -143,8 +143,3 @@ downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des 
 print(videos)
 print(downloadVideo2part)
 """
-trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 15) #première option lien du fichier, deuxième nombre de vidéo récupérer
-videos = trending.getProvideTiktokFeeds() #Récupérer les vidéos des tiktok des gens avec uniquement leur lien de profil
-downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des tiktok / youtube de lien dans la deuxième partie du fichier pour download
-print(videos)
-print(downloadVideo2part)
