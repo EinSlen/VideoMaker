@@ -68,16 +68,13 @@ class TiktokFeedsProviders:
                 pass
             return None
 
-        # Mélanger les liens TikTok/Youtube
-        random.shuffle(tiktok_links)
-        random.shuffle(youtube_links)
+        #TODO ça prend 1 lien pour le temps pour mettre toutes les vidéos du même profil
+        tiktok_links = random.sample(tiktok_links, 1)
 
         # Traiter les liens TikTok mélangés
         for lien in tiktok_links:
             try:
                 self.driver.get(lien)
-                if len(self.videos_link_feeds) >= self.len:
-                    break
 
                 # Attendre que les vidéos soient chargées
                 time.sleep(2)
@@ -88,12 +85,11 @@ class TiktokFeedsProviders:
                 # Trouver les liens vidéo
                 video_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/video/']")
                 for video_link in video_links:
-                    if len(self.videos_link_feeds) >= self.len:
-                        break
                     href = video_link.get_attribute('href')
-                    self.videos_link_feeds.append(href)
-                    print(
-                        f"TikTokFeedsProviders: Nouveau lien video trouvé ({href}) [{len(self.videos_link_feeds)}/{self.len}]")
+                    if href not in self.videos_link_feeds:
+                        self.videos_link_feeds.append(href)
+                        print(
+                            f"TikTokFeedsProviders: Nouveau lien video trouvé ({href}) [{len(self.videos_link_feeds)}]")
 
             except Exception as e:
                 print(f"Erreur lors de la récupération des vidéos pour le lien {lien}: {e}")
@@ -101,6 +97,15 @@ class TiktokFeedsProviders:
         # TODO: Implémenter le traitement des liens YouTube
 
         try:
+            random.shuffle(self.videos_link_feeds)
+            if len(self.videos_link_feeds) == 0:
+                print("TikTokFeedsProviders: No link provided by tiktok")
+                return self.videos_link_feeds
+            elif len(self.videos_link_feeds) < self.len:
+                print(f"TikTokFeedsProviders: No enought link provided by tiktok, send : {len(self.videos_link_feeds)}")
+            else:
+                self.videos_link_feeds = self.videos_link_feeds[:self.len]
+            self.videos_link_feeds = random.sample(self.videos_link_feeds, self.len)
             self.driver.close()
             self.driver.quit()
             print("TiktokUploader : Driver quit")
@@ -138,3 +143,8 @@ downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des 
 print(videos)
 print(downloadVideo2part)
 """
+trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 15) #première option lien du fichier, deuxième nombre de vidéo récupérer
+videos = trending.getProvideTiktokFeeds() #Récupérer les vidéos des tiktok des gens avec uniquement leur lien de profil
+downloadVideo2part = trending.getVideosLinkFeeds() #récupérer les vidéos des tiktok / youtube de lien dans la deuxième partie du fichier pour download
+print(videos)
+print(downloadVideo2part)
