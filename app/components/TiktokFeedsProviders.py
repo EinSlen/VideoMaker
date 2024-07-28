@@ -102,8 +102,9 @@ class TiktokFeedsProviders:
                 print("TikTokFeedsProviders: No link provided by tiktok")
                 return self.videos_link_feeds
             elif len(self.videos_link_feeds) < self.len:
-                print(f"TikTokFeedsProviders: No enought link provided by tiktok, send : {len(self.videos_link_feeds)}")
+                print(f"TikTokFeedsProviders: No enought link provided by tiktok, send : {len(self.videos_link_feeds)} links")
             else:
+                print(f"TikTokFeedsProviders: enought link provided by tiktok, send : {self.len} links")
                 self.videos_link_feeds = self.videos_link_feeds[:self.len]
             self.videos_link_feeds = random.sample(self.videos_link_feeds, self.len)
             self.driver.close()
