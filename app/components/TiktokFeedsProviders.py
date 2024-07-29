@@ -102,15 +102,15 @@ class TiktokFeedsProviders:
                 print("TikTokFeedsProviders: No link provided by tiktok")
                 return self.videos_link_feeds
             elif len(self.videos_link_feeds) < self.len:
-                print(f"TikTokFeedsProviders: No enought link provided by tiktok, send : {len(self.videos_link_feeds)} links")
+                print(f"TikTokFeedsProviders: No enought link provided by tiktok, send : [{len(self.videos_link_feeds)}/{self.len}] links")
             else:
-                print(f"TikTokFeedsProviders: enought link provided by tiktok, send : {self.len} links")
+                print(f"TikTokFeedsProviders: enought link provided by tiktok, send : [{self.len}/{self.len}] links")
                 self.videos_link_feeds = self.videos_link_feeds[:self.len]
             self.videos_link_feeds = random.sample(self.videos_link_feeds, self.len)
             self.driver.close()
             self.driver.quit()
             print("TiktokUploader : Driver quit")
-            return self.videos_link_feeds if len(self.videos_link_feeds) > 0 else None
+            return self.videos_link_feeds
         except Exception as e:
             if len(self.videos_link_feeds) > 0:
                 return self.videos_link_feeds
@@ -135,7 +135,10 @@ class TiktokFeedsProviders:
             elif lien == "":  # Commence à collecter après la ligne vide
                 start_collecting = True
 
-        return self.extra_video_links if len(self.extra_video_links) > 0 else None
+        if len(self.extra_video_links) == 0:
+            print('TikTokFeedsProviders : No link provided find by tiktok')
+
+        return self.extra_video_links
 
 """
 trending = TiktokFeedsProviders(TRENDING_FILE_PATH, 10) #première option lien du fichier, deuxième nombre de vidéo récupérer
