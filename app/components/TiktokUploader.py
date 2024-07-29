@@ -1,286 +1,61 @@
-import sys
-import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager as CM
-from selenium.webdriver.chrome.service import Service
+import os
 from app.configuration import *
-from selenium.common.exceptions import NoSuchWindowException, TimeoutException
-from requests.exceptions import ConnectionError
-import unicodedata
+import subprocess
+import time
 
-# cd C:\Program Files\Google\Chrome\Application
-# chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\Valentin\Desktop\VideoMaker\app\localhost"
-
-"""
-driver.get('https://www.tiktok.com/login')
-ActionChains(driver).key_down(Keys.CONTROL).send_keys(
-    '-').key_up(Keys.CONTROL).perform()
-ActionChains(driver).key_down(Keys.CONTROL).send_keys(
-    '-').key_up(Keys.CONTROL).perform()
-print('Waiting 50s for manual login...')
-time.sleep(5)
-driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
-time.sleep(5)
-"""
+#PATH FOR THE NEW TIKTOK UPLOADER SUBMODULE
+# lien du submodule : https://github.com/makiisthenes/TiktokAutoUploader
+OUPUT_FOR_THE_NEW_UPLOAD = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/VideosDirPath')
+COOKIE_SESSION_DIRECTORY = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/CookiesDir')
+TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
+USER_CONFIG_NAME = 'dvlad'
+TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
 
 
-class TiktokUploader:
-    def __init__(self, list_video):
-        self.driver = self.getChromeDriver()
-        self.video_path_list = list_video
-        self.tentative_upload = 0
-        self.tags = None
+def upload_to_tiktok(link, title):
+    try:
+        os.chdir(TiktokAutoUploader_DIR)
 
-        print(self.video_path_list)
-
-        if len(self.video_path_list[0]) == 3:
-            for video_path, title, channel in self.video_path_list:
-                self.tags = [channel]
-                print("TiktokUploader : Vidéo trouvé. ", video_path, title)
-                self.upload(video_path, title)
-                print("TiktokUploader : Video upload complete")
-                self.video_path_list.pop()
-                self.tentative_upload = 0
-                time.sleep(2)
-        else:
-            for video_path, title in self.video_path_list:
-                print("TiktokUploader : Vidéo trouvé. ", video_path, title)
-                self.upload(video_path, title)
-                print("TiktokUploader : Video upload complete")
-                self.video_path_list.pop()
-                self.tentative_upload = 0
-                time.sleep(2)
-
-        self.driver.close()
-        self.driver.quit()
-        print("TiktokUploader : Driver quit")
-
-    def login(self):
-        print("TiktokUploader : Tu dois te connecter !")
-        print("TiktokUpload : Redirection -> creator-center/login")
-        self.driver.get('https://www.tiktok.com/login')
-        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(
-            '-').key_up(Keys.CONTROL).perform()
-        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(
-            '-').key_up(Keys.CONTROL).perform()
-        print('TiktokUploader : Attente de 50s pour une connection manuel...')
-        time.sleep(50)
-
-    def check_exists_by_xpath(self, xpath):
-        try:
-            self.driver.find_element(By.XPATH, xpath)
-        except NoSuchElementException:
+        def check_files_for_string_in_name(directory, search_string):
+            # Parcourt tous les fichiers dans le répertoire spécifié
+            for filename in os.listdir(directory):
+                # Vérifie si le nom du fichier contient la chaîne recherchée
+                if search_string in filename:
+                    print(f'Cookie de {USER_CONFIG_NAME} est enregistré.')
+                    return True
+            print(f'Cookie de {USER_CONFIG_NAME} n\'est pas enregistré.')
             return False
 
-        return True
+        if not check_files_for_string_in_name(COOKIE_SESSION_DIRECTORY, USER_CONFIG_NAME):
+            commande = [
+                "python",
+                "cli.py",
+                "login",
+                "-n",
+                "{}".format(USER_CONFIG_NAME),
+            ]
 
-    def delete_file(self, file_path):
-        if os.path.exists(file_path) and file_path != '':
-            os.remove(file_path)
-            print(f"Fichier supprimé : {file_path}")
-        else:
-            print(f"VideoMaker : Le fichier n'existe pas : {file_path}")
+            resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
+            print(f"Sortie standard : {resultat.stdout}")
+            print(f"Sortie d'erreur : {resultat.stderr}")
 
-    def getChromeDriver(self):
-        print("TiktokUploader : Ajout d'une chrome windows")
-        os.system(
-            f'cd "{CHROME_PATH_EXE}" && start chrome.exe --remote-debugging-port={CHROME_PORT} --user-data-dir="{CHROME_PATH_USER}"')
-        options = webdriver.ChromeOptions()
-        options.add_experimental_option("debuggerAddress", "localhost:" + str(CHROME_PORT))
-        options.add_argument('--remote-debugging-port=' + str(CHROME_PORT))
-        options.add_argument('--user-data-dir=' + CHROME_PATH_USER)
-        service = Service(executable_path=CM().install())
-        driver = webdriver.Chrome(options=options, service=service)
-        driver.switch_to.window(driver.current_window_handle)
-        print("TiktokUploader : Ajout d'une chrome windows terminé.")
-        return driver
+        # Commande à exécuter
+        commande = [
+            "python",
+            "cli.py",
+            "upload",
+            "--user",
+            "{}".format(USER_CONFIG_NAME),
+            "-v",
+            "{}".format(link),
+            "-t",
+            "{} - {}".format(title, TAGS)
+        ]
 
-    def preprocess_tag(self, input_string):
-        input_string = input_string.lower()
-        input_string = ''.join(char for char in unicodedata.normalize('NFD', input_string)
-                               if unicodedata.category(char) != 'Mn')
-        input_string = input_string.replace(" ", "").replace(".", "").replace("|", "").replace("?", "").replace("!", "")
-        return '#'+input_string
+        resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
+        print(f"Sortie standard : {resultat.stdout}")
+        print(f"Sortie d'erreur : {resultat.stderr}")
+        time.sleep(5)
 
-    def upload(self, video_path, title):
-        try:
-            """
-            WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-                (By.XPATH, "//input[@type='file']"))).send_keys(
-                video_path)
-            """
-            print("TiktokUpload : Redirection -> creator-center/upload")
-            self.driver.get('https://www.tiktok.com/creator-center/upload?lang=fr')
-            self.driver.switch_to.window(self.driver.current_window_handle)
-            time.sleep(5)
-
-            iframe = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//iframe[@data-tt='Upload_index_iframe']")))
-            self.driver.switch_to.frame(iframe)
-
-            file_uploader = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']")))
-            file_uploader.send_keys(video_path)
-
-            self.driver.switch_to.default_content()
-
-            iframe_element = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//iframe[@data-tt='Upload_index_iframe']"))
-            )
-
-            self.driver.switch_to.frame(iframe_element)
-
-            #afficher la page en cours
-            #print(self.driver.page_source)
-
-            description_element = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".public-DraftEditor-content"))
-            )
-
-            description_element.click()
-
-            description_element.send_keys(title + " - ")
-
-            """
-            caption = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "input.search-friends"))
-            )
-      
-            #WebDriverWait(self.driver, 15).until(
-            #    EC.presence_of_element_located((By.CSS_SELECTOR, "div.videoInfo"))
-            #)
-            
-            self.driver.implicitly_wait(10)
-            ActionChains(self.driver).move_to_element(caption).click(
-                caption).perform()
-
-            ActionChains(self.driver).move_to_element(caption).click()
-            # ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(
-            #    'v').key_up(Keys.CONTROL).perform()
-            """
-
-            time.sleep(0.5)
-
-            print("TiktokUpload : Ajout du titre : " + title)
-            """
-            ActionChains(self.driver).send_keys(title + " - ").perform()
-            """
-
-            with open(CAPTION, "r") as f:
-                tags = [line.strip() for line in f]
-                print("TiktokUpload : Récupération des tags : " + str(tags))
-
-            for tag in tags:
-                print("TiktokUpload : Ajout du tag : " + tag)
-                """
-                ActionChains(self.driver).move_to_element(caption).click(
-                    caption).perform()
-                ActionChains(self.driver).move_to_element(description_element).click(
-                    description_element).perform()
-                """
-                ActionChains(self.driver).send_keys(Keys.END).perform()
-                time.sleep(0.5)
-                ActionChains(self.driver).send_keys(tag).perform()
-                time.sleep(1.5)
-                ActionChains(self.driver).send_keys(Keys.RETURN).perform()
-                time.sleep(0.5)
-
-            if self.tags is not None:
-                for tag in self.tags:
-                    tag = self.preprocess_tag(tag)
-                    print("TiktokUpload : Ajout du tag : " + tag)
-                    """
-                    ActionChains(self.driver).move_to_element(caption).click(
-                        caption).perform()
-                    ActionChains(self.driver).move_to_element(description_element).click(
-                        description_element).perform()
-                    """
-                    ActionChains(self.driver).send_keys(Keys.END).perform()
-                    time.sleep(0.5)
-                    ActionChains(self.driver).send_keys(tag).perform()
-                    time.sleep(1.5)
-                    ActionChains(self.driver).send_keys(Keys.RETURN).perform()
-                    time.sleep(0.5)
-
-            time.sleep(2)
-            self.driver.execute_script("window.scrollTo(150, 300);")
-
-            post = WebDriverWait(self.driver, 100).until(
-                EC.visibility_of_element_located(
-                    (By.CSS_SELECTOR, 'button.css-y1m958')))
-
-            while post.value_of_css_property("background-color") != 'rgba(254, 44, 85, 1)':
-                print("TiktokUpload : La vidéo n'est pas encore chargé...")
-                time.sleep(1)
-
-            post.click()
-            print("TiktokUploader : La vidéo de " + title + " à été upload.")
-            #print("TiktokUploader : Suppression de " + title + " en cours...")
-            self.delete_file(video_path)
-            time.sleep(0.5)
-
-            """
-            if check_exists_by_xpath(driver, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
-                reupload = WebDriverWait(driver, 100).until(EC.visibility_of_element_located(
-                    (By.XPATH, '//*[@id="portal-container"]/div/div/div[1]/div[2]')))
-
-                reupload.click()
-            else:
-                print('Unknown error cooldown')
-                while True:
-                    time.sleep(600)
-                    post.click()
-                    time.sleep(15)
-                    if check_exists_by_xpath(driver, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
-                        break
-
-            if check_exists_by_xpath(driver, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
-                reupload = WebDriverWait(driver, 100).until(EC.visibility_of_element_located(
-                    (By.XPATH, '//*[@id="portal-container"]/div/div/div[1]/div[2]')))
-                reupload.click()
-
-            time.sleep(1)
-            """
-        except (NoSuchWindowException, NoSuchElementException, TimeoutException, ConnectionError, Exception) as e:
-            self.tentative_upload += 1
-            print('Tentative upload : ', self.tentative_upload)
-            if self.tentative_upload > TENTATIVE_UPLOAD:
-                print(f'Upload à échouée à {self.tentative_upload} tentatives. Arrêt complet pour cause :')
-                print(e)
-                self.driver.close()
-                self.driver.quit()
-                sys.exit()
-            if isinstance(e, NoSuchWindowException):
-                print("TiktokUpload : Aucune chrome window, relancement !")
-                self.driver.close()
-                self.driver.quit()
-                self.driver = self.getChromeDriver()
-                self.upload(video_path, title)
-            elif isinstance(e, NoSuchElementException):
-                print("TiktokUpload : Aucun Element... Vous devez vous relogin...")
-                self.login()
-                self.upload(video_path, title)
-            elif isinstance(e, TimeoutException) or isinstance(e, ConnectionError):
-                print("TiktokUpload : Timeout or Connection Error... Reupload..")
-                self.upload(video_path, title)
-            else:
-                print("TiktokUpload : Une autre exception a été levée, fermeture ! Erreur :")
-                print(e)
-                self.driver.close()
-                self.driver.quit()
-                sys.exit()
-
-
-"""
-Utilisation : 
-path_video = "C:\\Users\\Valentin\\Desktop\\VideoMaker\\videos\\Je suis onze nations – vidéo courte.mp4"
-tiktokuploader = TiktokUploader([(path_video, "TEST")])
-Options feature : Ajouter des tags autre que de base (prédéfini dans CAPTION.txt)
-tiktokuploader = TiktokUploader([(path_video, "TEST")], ["#humour", "#fyp"])
-"""
+    except Exception as e:
+        print(str(e))
