@@ -176,7 +176,7 @@ class CreateTiktokSplit:
                 main_video.close()
                 if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
                     for link, title in self.tiktok_link_for_upload:
-                        upload_to_tiktok(USER_CONFIG_NAME, link, title)
+                        upload_to_tiktok(USER_CONFIG_NAME_1, link, title)
                         os.remove(OUPUT_FOR_THE_NEW_UPLOAD + '/' + link)
                     self.tiktok_link_for_upload.clear()
                 self.remove_all_files_in_directory(PATH_TEMP)
