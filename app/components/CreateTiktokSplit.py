@@ -112,6 +112,15 @@ class CreateTiktokSplit:
             print(f"Erreur lors de la suppression des fichiers : {e}")
 
     def split_video(self):
+        if len(self.list_part_video) == 0:
+            print("La liste des vidéos part est vide.")
+            print("Aucune vidéo n'a été faite. Reload vidéo...")
+            self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+            self.split_video()
+            return
+
+        self.remove_all_files_in_directory(PATH_TEMP)
+
         for link_video in self.list_main_video:
             path_main_video, title = self.download_dynamic_video(link_video, PATH_TEMP)
             main_video = VideoFileClip(path_main_video)
@@ -122,13 +131,6 @@ class CreateTiktokSplit:
 
                 for start in range(0, int(total_duration), TIKTOK_TEMPS_VIDEO):
                     end = min(start + TIKTOK_TEMPS_VIDEO, total_duration)
-
-                    if len(self.list_part_video) == 0 and index == 0:
-                        print("La liste des vidéos part est vide.")
-                        print("Aucune vidéo n'a été faite. Reload vidéo...")
-                        self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
-                        self.split_video()
-                        return
 
                     if math.ceil(end) - math.ceil(start) < TIKTOK_TEMPS_VIDEO - 2:
                         print("Temps de la vidéo restant trop court pour une nouvelle vidéo. Abandon.")
