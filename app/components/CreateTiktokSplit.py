@@ -30,8 +30,9 @@ class CreateTiktokSplit:
         self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
         self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
         self.tiktok_link_for_upload = []
-        self.output_video_path = EDITED_PATH
         self.is_upload_tiktok = upload_tiktok
+        if upload_tiktok:
+            print("CreateTiktokSplit : UPLOAD ACTIF /!\\ ")
 
     def download_dynamic_video(self, lien, output_path):
         link, title = None, None
@@ -111,49 +112,44 @@ class CreateTiktokSplit:
             print(f"Erreur lors de la suppression des fichiers : {e}")
 
     def split_video(self):
-
         for link_video in self.list_main_video:
-
             path_main_video, title = self.download_dynamic_video(link_video, PATH_TEMP)
-            # Charger la vidéo principale
             main_video = VideoFileClip(path_main_video)
 
             try:
-                # Durée totale de la vidéo principale
                 total_duration = main_video.duration
-
-                # Index pour les noms des fichiers de sortie
                 index = 0
 
-                # Découper la vidéo principale en segments de 63 secondes
                 for start in range(0, int(total_duration), TIKTOK_TEMPS_VIDEO):
                     end = min(start + TIKTOK_TEMPS_VIDEO, total_duration)
-                    print(math.ceil(end) - math.ceil(start))
-                    print(math.ceil(end) - math.ceil(start) < TIKTOK_TEMPS_VIDEO)
-                    if math.ceil(end) - math.ceil(start) < TIKTOK_TEMPS_VIDEO-2:
+
+                    if len(self.list_part_video) == 0 and index == 0:
+                        print("La liste des vidéos part est vide.")
+                        print("Aucune vidéo n'a été faite. Reload vidéo...")
+                        self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+                        self.split_video()
+                        return
+
+                    if math.ceil(end) - math.ceil(start) < TIKTOK_TEMPS_VIDEO - 2:
                         print("Temps de la vidéo restant trop court pour une nouvelle vidéo. Abandon.")
                         if index == 0:
                             print("Aucune vidéo n'a été faite. Reload vidéo...")
                             self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
                             self.split_video()
                         return
-                    segment = main_video.subclip(start, end)
 
-                    if len(self.list_part_video) == 0:
-                        print("La liste des vidéos part est vide.")
-                        return
+                    segment = main_video.subclip(start, end)
 
                     choose_part_video = random.choice(self.list_part_video)
                     secondary_video_path = self.download_dynamic_video(choose_part_video, PATH_TEMP)[0]
-
-                    # Charger la vidéo secondaire
                     secondary_video = VideoFileClip(secondary_video_path)
 
                     try:
-                        # Ajuster la taille des vidéos pour les mettre côte à côte
-                        min_height = min(segment.h, secondary_video.h)
-                        segment = segment.resize(height=min_height)
-                        secondary_video = secondary_video.resize(height=min_height)
+                        # Redimensionner les vidéos tout en maintenant le rapport d'aspect
+                        segment = segment.resize(
+                            height=RESOLUTION_TIKTOK[1])
+                        secondary_video = secondary_video.resize(
+                            height=RESOLUTION_TIKTOK[1])
 
                         # Enlever le son de la deuxième vidéo
                         secondary_video = secondary_video.without_audio()
@@ -161,10 +157,14 @@ class CreateTiktokSplit:
                         # Créer un array de clips côte à côte
                         combined_clip = clips_array([[segment, secondary_video]])
 
+                        #resize le clip finish
+                        resolution_temp = (RESOLUTION_TIKTOK[0], 1280)
+                        combined_clip = combined_clip.resize(newsize=resolution_temp)
+
                         # Sauvegarder le résultat
                         output_filename_base = f"combined_video_{index}.mp4"
                         output_filename = os.path.join(OUPUT_FOR_THE_NEW_UPLOAD, output_filename_base)
-                        combined_clip.write_videofile(output_filename)
+                        combined_clip.write_videofile(output_filename, fps=FPS_TIKTOK)
                         self.tiktok_link_for_upload.append([output_filename_base, title])
 
                         index += 1
@@ -176,15 +176,16 @@ class CreateTiktokSplit:
                 main_video.close()
                 if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
                     for link, title in self.tiktok_link_for_upload:
-                        upload_to_tiktok(link, title)
-                        os.remove(link)
+                        upload_to_tiktok(USER_CONFIG_NAME, link, title)
+                        os.remove(OUPUT_FOR_THE_NEW_UPLOAD + '/' + link)
+                    self.tiktok_link_for_upload.clear()
                 self.remove_all_files_in_directory(PATH_TEMP)
-                #self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
+                # self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
 
 
 """
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, False) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(1, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
