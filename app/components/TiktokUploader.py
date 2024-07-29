@@ -3,16 +3,7 @@ from app.configuration import *
 import subprocess
 import time
 
-#PATH FOR THE NEW TIKTOK UPLOADER SUBMODULE
-# lien du submodule : https://github.com/makiisthenes/TiktokAutoUploader
-OUPUT_FOR_THE_NEW_UPLOAD = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/VideosDirPath')
-COOKIE_SESSION_DIRECTORY = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/CookiesDir')
-TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
-USER_CONFIG_NAME = 'dvlad'
-TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
-
-
-def upload_to_tiktok(link, title):
+def upload_to_tiktok(cookie_name, link, title):
     try:
         os.chdir(TiktokAutoUploader_DIR)
 
@@ -21,18 +12,20 @@ def upload_to_tiktok(link, title):
             for filename in os.listdir(directory):
                 # Vérifie si le nom du fichier contient la chaîne recherchée
                 if search_string in filename:
-                    print(f'Cookie de {USER_CONFIG_NAME} est enregistré.')
+                    print(f'TiktokUpload : Cookie de {cookie_name} est enregistré.')
+                    print(f'TiktokUpload : LA VIDEO VA ETRE UPLOAD...')
                     return True
-            print(f'Cookie de {USER_CONFIG_NAME} n\'est pas enregistré.')
+            print(f'TiktokUpload : Cookie de {cookie_name} n\'est pas enregistré.')
+            print(f'TiktokUpload : BESOIN DE S\'ENREGISTRER POUR UPLOAD LA VIDEO')
             return False
 
-        if not check_files_for_string_in_name(COOKIE_SESSION_DIRECTORY, USER_CONFIG_NAME):
+        if not check_files_for_string_in_name(COOKIE_SESSION_DIRECTORY, cookie_name):
             commande = [
                 "python",
                 "cli.py",
                 "login",
                 "-n",
-                "{}".format(USER_CONFIG_NAME),
+                "{}".format(cookie_name),
             ]
 
             resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
@@ -45,7 +38,7 @@ def upload_to_tiktok(link, title):
             "cli.py",
             "upload",
             "--user",
-            "{}".format(USER_CONFIG_NAME),
+            "{}".format(cookie_name),
             "-v",
             "{}".format(link),
             "-t",
