@@ -12,13 +12,21 @@ LIBRARY_PATH = os.path.join(PATH_PARENT, 'app', 'lib/')
 
 LANGUAGE = "fr-FR"
 
-RESOLUTION_TIKTOK = (720, 1280)
+RESOLUTION_TIKTOK = (1080, 1920)
 FPS_TIKTOK = 60
 TIKTOK_TEMPS_VIDEO = 60 #60 secondes correspond à 1 minute
 FONT_TEXT = 'Arial-Bold-Italic'
 FONT_PATH = os.path.join(PATH_PARENT, 'app', 'highlight', 'Arial.ttf')
 COLOR_TEXT = ('yellow', 'orange')
 STROKE_SIZE = 2
+
+#PATH FOR THE NEW TIKTOK UPLOADER SUBMODULE
+# lien du submodule : https://github.com/makiisthenes/TiktokAutoUploader
+OUPUT_FOR_THE_NEW_UPLOAD = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/VideosDirPath')
+COOKIE_SESSION_DIRECTORY = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/CookiesDir')
+TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
+USER_CONFIG_NAME_1 = 'dvlad'
+TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
 
 MODEL_PATH = os.path.join(LIBRARY_PATH, 'vosk-model-small-fr-0.22')
 MODEL = "medium"
