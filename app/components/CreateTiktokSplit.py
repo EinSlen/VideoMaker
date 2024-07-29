@@ -1,3 +1,4 @@
+import math
 import os
 import random
 import re
@@ -11,7 +12,7 @@ from moviepy.video.compositing.CompositeVideoClip import clips_array
 from pytube import YouTube
 
 from app.components.TiktokFeedsProviders import TiktokFeedsProviders
-from app.components.TiktokUploader import TiktokUploader
+from app.components.TiktokUploader import upload_to_tiktok
 from app.configuration import *
 import requests
 
@@ -25,9 +26,9 @@ TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
 
 class CreateTiktokSplit:
     def __init__(self, link_length = 1, upload_tiktok = False):
-        tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, link_length)
-        self.list_main_video = tiktokFeedsProviders.getProvideTiktokFeeds()
-        self.list_part_video = tiktokFeedsProviders.getVideosLinkFeeds()
+        self.tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, link_length)
+        self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+        self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
         self.tiktok_link_for_upload = []
         self.output_video_path = EDITED_PATH
         self.is_upload_tiktok = upload_tiktok
@@ -127,6 +128,15 @@ class CreateTiktokSplit:
                 # Découper la vidéo principale en segments de 63 secondes
                 for start in range(0, int(total_duration), TIKTOK_TEMPS_VIDEO):
                     end = min(start + TIKTOK_TEMPS_VIDEO, total_duration)
+                    print(math.ceil(end) - math.ceil(start))
+                    print(math.ceil(end) - math.ceil(start) < TIKTOK_TEMPS_VIDEO)
+                    if math.ceil(end) - math.ceil(start) < TIKTOK_TEMPS_VIDEO-2:
+                        print("Temps de la vidéo restant trop court pour une nouvelle vidéo. Abandon.")
+                        if index == 0:
+                            print("Aucune vidéo n'a été faite. Reload vidéo...")
+                            self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+                            self.split_video()
+                        return
                     segment = main_video.subclip(start, end)
 
                     if len(self.list_part_video) == 0:
@@ -164,63 +174,17 @@ class CreateTiktokSplit:
 
             finally:
                 main_video.close()
-                self.remove_all_files_in_directory(PATH_TEMP)
                 if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
                     for link, title in self.tiktok_link_for_upload:
-                        self.upload_to_tiktok(link, title)
-                self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
-
-    def upload_to_tiktok(self, link, title):
-        try:
-            os.chdir(TiktokAutoUploader_DIR)
-
-            def check_files_for_string_in_name(directory, search_string):
-                # Parcourt tous les fichiers dans le répertoire spécifié
-                for filename in os.listdir(directory):
-                    # Vérifie si le nom du fichier contient la chaîne recherchée
-                    if search_string in filename:
-                        print(f'Cookie de {USER_CONFIG_NAME} est enregistré.')
-                        return True
-                print(f'Cookie de {USER_CONFIG_NAME} n\'est pas enregistré.')
-                return False
-
-            if not check_files_for_string_in_name(COOKIE_SESSION_DIRECTORY, USER_CONFIG_NAME):
-                commande = [
-                    "python",
-                    "cli.py",
-                    "login",
-                    "-n",
-                    "{}".format(USER_CONFIG_NAME),
-                ]
-
-                resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
-                print(f"Sortie standard : {resultat.stdout}")
-                print(f"Sortie d'erreur : {resultat.stderr}")
-
-            # Commande à exécuter
-            commande = [
-                "python",
-                "cli.py",
-                "upload",
-                "--user",
-                "{}".format(USER_CONFIG_NAME),
-                "-v",
-                "{}".format(link),
-                "-t",
-                "{} - {}".format(title, TAGS)
-            ]
-
-            resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
-            print(f"Sortie standard : {resultat.stdout}")
-            print(f"Sortie d'erreur : {resultat.stderr}")
-
-        except Exception as e:
-            print(str(e))
+                        upload_to_tiktok(link, title)
+                        os.remove(link)
+                self.remove_all_files_in_directory(PATH_TEMP)
+                #self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
 
 
 """
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(3, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(1, False) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
