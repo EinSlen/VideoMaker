@@ -197,18 +197,24 @@ class CreateTiktokSplit:
 
             finally:
                 main_video.close()
-                if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
-                    for link, title in self.tiktok_link_for_upload:
-                        upload_to_tiktok(USER_CONFIG_NAME_1, link, title)
-                        os.remove(OUPUT_FOR_THE_NEW_UPLOAD + '/' + link)
-                    self.tiktok_link_for_upload.clear()
+                try:
+                    if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
+                        for link, title in self.tiktok_link_for_upload:
+                            upload_to_tiktok(USER_CONFIG_NAME_1, link, title, True)
+                            # os.remove(OUPUT_FOR_THE_NEW_UPLOAD + '/' + link)
+                        self.tiktok_link_for_upload.clear()
+                    # self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
+                except Exception as e:
+                    print("CreateTiktokSplit: Error lors de l'upload de la vidéo. Abandon.")
+                    print("Error : " + str(e))
+                    return
+
                 self.remove_all_files_in_directory(PATH_TEMP)
-                # self.remove_all_files_in_directory(OUPUT_FOR_THE_NEW_UPLOAD)
 
 
 """
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(3, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(1, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()

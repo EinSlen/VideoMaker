@@ -3,7 +3,7 @@ from app.configuration import *
 import subprocess
 import time
 
-def upload_to_tiktok(cookie_name, link, title):
+def upload_to_tiktok(cookie_name, link, title, is_delete_video = False):
     try:
         os.chdir(TiktokAutoUploader_DIR)
 
@@ -48,7 +48,10 @@ def upload_to_tiktok(cookie_name, link, title):
         resultat = subprocess.run(commande, check=True, capture_output=True, text=True)
         print(f"Sortie standard : {resultat.stdout}")
         print(f"Sortie d'erreur : {resultat.stderr}")
-        time.sleep(5)
+        time.sleep(3)
+        if is_delete_video:
+            os.remove(OUPUT_FOR_THE_NEW_UPLOAD + '/' + link)
+        time.sleep(0.5)
 
     except Exception as e:
         print(str(e))
