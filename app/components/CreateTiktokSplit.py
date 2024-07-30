@@ -112,10 +112,11 @@ class CreateTiktokSplit:
             print(f"Erreur lors de la suppression des fichiers : {e}")
 
     def split_video(self):
-        if len(self.list_part_video) == 0:
+        if len(self.list_part_video) == 0 or len(self.list_main_video) == 0:
             print("La liste des vidéos part est vide.")
             print("Aucune vidéo n'a été faite. Reload vidéo...")
             self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+            self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
             self.split_video()
             return
 
