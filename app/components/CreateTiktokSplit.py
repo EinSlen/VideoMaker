@@ -123,8 +123,16 @@ class CreateTiktokSplit:
         self.remove_all_files_in_directory(PATH_TEMP)
 
         for link_video in self.list_main_video:
-            path_main_video, title = self.download_dynamic_video(link_video, PATH_TEMP)
-            main_video = VideoFileClip(path_main_video)
+            try:
+                path_main_video, title = self.download_dynamic_video(link_video, PATH_TEMP)
+                main_video = VideoFileClip(path_main_video)
+            except:
+                print("CreateTiktokSplit : Erreur lors du téléchargement de la vidéo main.")
+                print("Reencoding")
+                self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+                self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
+                self.split_video()
+                return
 
             try:
                 total_duration = main_video.duration
@@ -138,14 +146,23 @@ class CreateTiktokSplit:
                         if index == 0:
                             print("Aucune vidéo n'a été faite. Reload vidéo...")
                             self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+                            self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
                             self.split_video()
                         return
 
                     segment = main_video.subclip(start, end)
 
                     choose_part_video = random.choice(self.list_part_video)
-                    secondary_video_path = self.download_dynamic_video(choose_part_video, PATH_TEMP)[0]
-                    secondary_video = VideoFileClip(secondary_video_path)
+                    try:
+                        secondary_video_path = self.download_dynamic_video(choose_part_video, PATH_TEMP)[0]
+                        secondary_video = VideoFileClip(secondary_video_path)
+                    except:
+                        print("CreateTiktokSplit : Erreur lors du téléchargement de la vidéo secondaire.")
+                        print("Reencoding")
+                        self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
+                        self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
+                        self.split_video()
+                        return
 
                     try:
                         # Redimensionner les vidéos tout en maintenant le rapport d'aspect
@@ -193,5 +210,5 @@ class CreateTiktokSplit:
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(3, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
