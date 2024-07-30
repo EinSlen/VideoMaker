@@ -178,7 +178,7 @@ class CreateTiktokSplit:
                         combined_clip = clips_array([[segment, secondary_video]])
 
                         #resize le clip finish
-                        resolution_temp = (RESOLUTION_TIKTOK[0], 1280)
+                        resolution_temp = (RESOLUTION_TIKTOK[0], 1000)
                         combined_clip = combined_clip.resize(newsize=resolution_temp)
 
                         # Sauvegarder le résultat
