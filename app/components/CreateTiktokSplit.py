@@ -168,7 +168,10 @@ class CreateTiktokSplit:
                         output_filename_base = f"combined_video_{index}.mp4"
                         output_filename = os.path.join(OUPUT_FOR_THE_NEW_UPLOAD, output_filename_base)
                         combined_clip.write_videofile(output_filename, fps=FPS_TIKTOK)
-                        self.tiktok_link_for_upload.append([output_filename_base, title])
+                        if index == 0:
+                            self.tiktok_link_for_upload.append([output_filename_base, title])
+                        else:
+                            self.tiktok_link_for_upload.append([output_filename_base, title + " - Part " + str((index+1))])
 
                         index += 1
 
