@@ -148,7 +148,8 @@ class CreateTiktokSplit:
                             self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
                             self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
                             self.split_video()
-                        return
+                            return
+                        break
 
                     segment = main_video.subclip(start, end)
 
@@ -216,5 +217,5 @@ class CreateTiktokSplit:
 createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(3, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
