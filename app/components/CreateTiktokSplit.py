@@ -129,6 +129,8 @@ class CreateTiktokSplit:
             except:
                 print("CreateTiktokSplit : Erreur lors du téléchargement de la vidéo main.")
                 print("Reencoding")
+
+                self.tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, len(self.list_main_video))
                 self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
                 self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
                 self.split_video()
@@ -145,6 +147,8 @@ class CreateTiktokSplit:
                         print("Temps de la vidéo restant trop court pour une nouvelle vidéo. Abandon.")
                         if index == 0:
                             print("Aucune vidéo n'a été faite. Reload vidéo...")
+
+                            self.tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, len(self.list_main_video))
                             self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
                             self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
                             self.split_video()
@@ -160,6 +164,7 @@ class CreateTiktokSplit:
                     except:
                         print("CreateTiktokSplit : Erreur lors du téléchargement de la vidéo secondaire.")
                         print("Reencoding")
+                        self.tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, len(self.list_main_video))
                         self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
                         self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
                         self.split_video()
