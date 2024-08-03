@@ -171,7 +171,6 @@ class CreateTiktokSplit:
                         return
 
                     try:
-
                         print(f"Create Video : {len(self.list_main_video)-(len(self.list_part_video)-1)}/{len(self.list_part_video)}")
                         # Redimensionner les vidéos tout en maintenant le rapport d'aspect
                         segment = segment.resize(
