@@ -9,6 +9,7 @@ VIDEOS_DIRECTORY = os.path.join(PATH_PARENT, 'videos/')
 EDITED_PATH = os.path.join(PATH_PARENT, 'edited/')
 
 LIBRARY_PATH = os.path.join(PATH_PARENT, 'app', 'lib/')
+SOUND_DIRECTORY = os.path.join(PATH_PARENT, 'sounds/')
 
 LANGUAGE = "fr-FR"
 

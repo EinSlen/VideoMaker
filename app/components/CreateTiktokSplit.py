@@ -7,6 +7,9 @@ import time
 
 import yt_dlp
 import subprocess
+
+from moviepy.audio.AudioClip import CompositeAudioClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 from moviepy.video.compositing.CompositeVideoClip import clips_array
 from pytube import YouTube
@@ -16,23 +19,19 @@ from app.components.TiktokUploader import upload_to_tiktok
 from app.configuration import *
 import requests
 
-#PATH FOR THE NEW TIKTOK UPLOADER SUBMODULE
-# lien du submodule : https://github.com/makiisthenes/TiktokAutoUploader
-OUPUT_FOR_THE_NEW_UPLOAD = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/VideosDirPath')
-COOKIE_SESSION_DIRECTORY = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/CookiesDir')
-TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
-USER_CONFIG_NAME = 'dvlad'
-TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
-
 class CreateTiktokSplit:
-    def __init__(self, link_length = 1, upload_tiktok = False):
+    def __init__(self, link_length = 1, add_sound = False, upload_tiktok = False):
         self.tiktokFeedsProviders = TiktokFeedsProviders(TRENDING_FILE_PATH, link_length)
         self.list_main_video = self.tiktokFeedsProviders.getProvideTiktokFeeds()
         self.list_part_video = self.tiktokFeedsProviders.getVideosLinkFeeds()
         self.tiktok_link_for_upload = []
         self.is_upload_tiktok = upload_tiktok
+        self.is_add_sound = add_sound
         if upload_tiktok:
             print("CreateTiktokSplit : UPLOAD ACTIF /!\\ ")
+        if add_sound:
+            print("CreateTiktokSplit : SOUND ACTIF /!\\ ")
+
 
     def download_dynamic_video(self, lien, output_path):
         link, title = None, None
@@ -187,10 +186,21 @@ class CreateTiktokSplit:
                         resolution_temp = (RESOLUTION_TIKTOK[0], 1000)
                         combined_clip = combined_clip.resize(newsize=resolution_temp)
 
+                        if self.is_add_sound:
+                            sound_files = [f for f in os.listdir(SOUND_DIRECTORY) if f.endswith('.mp3')]
+                            if sound_files:
+                                random_sound = random.choice(sound_files)
+                                added_audio = AudioFileClip(os.path.join(SOUND_DIRECTORY, random_sound)).volumex(0.01)
+                                original_audio = combined_clip.audio
+                                combined_audio = CompositeAudioClip(
+                                    [original_audio, added_audio.set_duration(original_audio.duration)])
+                                combined_clip = combined_clip.set_audio(combined_audio)
+
                         # Sauvegarder le résultat
                         output_filename_base = f"combined_video_{index}.mp4"
                         output_filename = os.path.join(OUPUT_FOR_THE_NEW_UPLOAD, output_filename_base)
                         combined_clip.write_videofile(output_filename, fps=FPS_TIKTOK)
+                        print("Saved video to", output_filename)
                         if index == 0:
                             self.tiktok_link_for_upload.append([output_filename_base, title])
                         else:
@@ -219,8 +229,8 @@ class CreateTiktokSplit:
 
 
 """
-createTiktokSplit = CreateTiktokSplit() # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit() # on a 3 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour le sond et upload sur tiktok automatiquement CreateTiktokSplit(5, True, True)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(3, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(1, True, False) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
