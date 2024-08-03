@@ -225,7 +225,6 @@ class CreateTiktokSplit:
                 except Exception as e:
                     print("CreateTiktokSplit: Error lors de l'upload de la vidéo. Abandon.")
                     print("Error : " + str(e))
-                    return
 
                 self.remove_all_files_in_directory(PATH_TEMP)
 
