@@ -195,6 +195,8 @@ class CreateTiktokSplit:
                                 combined_audio = CompositeAudioClip(
                                     [original_audio, added_audio.set_duration(original_audio.duration)])
                                 combined_clip = combined_clip.set_audio(combined_audio)
+                            else:
+                                print("No sound file in " + SOUND_DIRECTORY)
 
                         # Sauvegarder le résultat
                         output_filename_base = f"combined_video_{index}.mp4"
