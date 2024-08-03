@@ -160,6 +160,7 @@ class CreateTiktokSplit:
                     try:
                         secondary_video_path = self.download_dynamic_video(choose_part_video, PATH_TEMP)[0]
                         secondary_video = VideoFileClip(secondary_video_path)
+                        secondary_video = secondary_video.subclip(0, main_video.duration)
                     except:
                         print("CreateTiktokSplit : Erreur lors du téléchargement de la vidéo secondaire.")
                         print("Reencoding")
@@ -170,6 +171,8 @@ class CreateTiktokSplit:
                         return
 
                     try:
+
+                        print(f"Create Video : {len(self.list_main_video)-(len(self.list_part_video)-1)}/{len(self.list_part_video)}")
                         # Redimensionner les vidéos tout en maintenant le rapport d'aspect
                         segment = segment.resize(
                             height=RESOLUTION_TIKTOK[1])
@@ -233,5 +236,5 @@ class CreateTiktokSplit:
 createTiktokSplit = CreateTiktokSplit() # on a 3 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour le sond et upload sur tiktok automatiquement CreateTiktokSplit(5, True, True)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, True, False) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(3, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
