@@ -21,7 +21,8 @@ def upload_to_tiktok(cookie_name, link, title, is_delete_video = False):
 
         if not check_files_for_string_in_name(COOKIE_SESSION_DIRECTORY, cookie_name):
             commande = [
-                "python",
+                "py",
+                "-m",
                 "cli.py",
                 "login",
                 "-n",
@@ -34,7 +35,8 @@ def upload_to_tiktok(cookie_name, link, title, is_delete_video = False):
 
         # Commande à exécuter
         commande = [
-            "python",
+            "py",
+            "-m",
             "cli.py",
             "upload",
             "--user",
