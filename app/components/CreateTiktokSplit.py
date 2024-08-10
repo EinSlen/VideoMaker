@@ -171,7 +171,7 @@ class CreateTiktokSplit:
                         return
 
                     try:
-                        print(f"Create Video : {len(self.list_main_video)-(len(self.list_part_video)-1)}/{len(self.list_part_video)}")
+                        print(f"Create Video : {index}/{len(self.list_main_video)}")
                         # Redimensionner les vidéos tout en maintenant le rapport d'aspect
                         segment = segment.resize(
                             height=RESOLUTION_TIKTOK[1])
@@ -235,5 +235,5 @@ class CreateTiktokSplit:
 createTiktokSplit = CreateTiktokSplit() # on a 3 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour le sond et upload sur tiktok automatiquement CreateTiktokSplit(5, True, True)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(3, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+createTiktokSplit = CreateTiktokSplit(1, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
 createTiktokSplit.split_video()
