@@ -237,12 +237,12 @@ createTiktokSplit = CreateTiktokSplit() # on a 3 arguments optionnel (la taille 
 createTiktokSplit.split_video()
 """
 
-def createTiktokSplit():
+def createTiktokSplit_TASK():
     createTiktokSplit = CreateTiktokSplit(1, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
     createTiktokSplit.split_video()
 
 for hour in HOUR_LIST:
-    schedule.every().day.at(hour).do(createTiktokSplit)
+    schedule.every().day.at(hour).do(createTiktokSplit_TASK)
 
 while True:
     schedule.run_pending()
