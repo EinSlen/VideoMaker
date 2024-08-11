@@ -244,6 +244,8 @@ def createTiktokSplit_TASK():
 for hour in HOUR_LIST:
     schedule.every().day.at(hour).do(createTiktokSplit_TASK)
 
+
+print("Start to wait task : " + str(createTiktokSplit_TASK.__name__))
 while True:
     schedule.run_pending()
     time.sleep(1)
