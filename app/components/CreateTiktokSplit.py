@@ -4,6 +4,7 @@ import random
 import re
 import shutil
 import time
+import schedule
 
 import yt_dlp
 import subprocess
@@ -235,5 +236,14 @@ class CreateTiktokSplit:
 createTiktokSplit = CreateTiktokSplit() # on a 3 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour le sond et upload sur tiktok automatiquement CreateTiktokSplit(5, True, True)
 createTiktokSplit.split_video()
 """
-createTiktokSplit = CreateTiktokSplit(1, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
-createTiktokSplit.split_video()
+
+def createTiktokSplit():
+    createTiktokSplit = CreateTiktokSplit(1, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+    createTiktokSplit.split_video()
+
+for hour in HOUR_LIST:
+    schedule.every().day.at(hour).do(createTiktokSplit)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)

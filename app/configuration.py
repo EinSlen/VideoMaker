@@ -28,6 +28,7 @@ COOKIE_SESSION_DIRECTORY = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader/Cookie
 TiktokAutoUploader_DIR = os.path.join(LIBRARY_PATH, 'TiktokAutoUploader')
 USER_CONFIG_NAME_1 = 'dvlad'
 TAGS = "#humour #fyp #foryou #foryoupage #fy #viral #funnyvideos"
+HOUR_LIST = ["08:00", "12:00", "18:00"]
 
 MODEL_PATH = os.path.join(LIBRARY_PATH, 'vosk-model-small-fr-0.22')
 MODEL = "medium"
