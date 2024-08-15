@@ -1,3 +1,5 @@
-2024/03/30-14:36:23.295 4e4c Reusing MANIFEST C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Local Storage\leveldb/MANIFEST-000001
-2024/03/30-14:36:23.297 4e4c Recovering log #67
-2024/03/30-14:36:23.300 4e4c Reusing old log C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Local Storage\leveldb/000067.log 
+2024/08/11-12:18:04.569 266c Creating DB C:\Users\mevs6\Desktop\VideoMaker\app\localhost\Default\Local Storage\leveldb since it was missing.
+2024/08/11-12:18:04.620 266c Reusing MANIFEST C:\Users\mevs6\Desktop\VideoMaker\app\localhost\Default\Local Storage\leveldb/MANIFEST-000001
+2024/08/11-12:20:01.644 266c Level-0 table #5: started
+2024/08/11-12:20:01.684 266c Level-0 table #5: 93592 bytes OK
+2024/08/11-12:20:01.704 266c Delete type=0 #3

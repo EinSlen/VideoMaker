@@ -1,3 +1,10 @@
-2024/03/30-14:36:23.434 1650 Reusing MANIFEST C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Site Characteristics Database/MANIFEST-000001
-2024/03/30-14:36:23.435 1650 Recovering log #3
-2024/03/30-14:36:23.435 1650 Reusing old log C:\Users\Valentin\Desktop\VideoMaker\app\localhost\Default\Site Characteristics Database/000003.log 
+2024/08/11-12:17:57.964 6d0 Reusing MANIFEST C:\Users\mevs6\Desktop\VideoMaker\app\localhost\Default\Site Characteristics Database/MANIFEST-000001
+2024/08/11-12:17:57.969 2534 Compacting 5@0 + 0@1 files
+2024/08/11-12:17:57.974 2534 Generated table #15@0: 2 keys, 199 bytes
+2024/08/11-12:17:57.975 2534 Compacted 5@0 + 0@1 files => 199 bytes
+2024/08/11-12:17:57.977 2534 compacted to: files[ 0 1 0 0 0 0 0 ]
+2024/08/11-12:17:57.978 2534 Delete type=2 #4
+2024/08/11-12:17:57.978 2534 Delete type=2 #7
+2024/08/11-12:17:57.979 2534 Delete type=2 #8
+2024/08/11-12:17:57.979 2534 Delete type=2 #11
+2024/08/11-12:17:57.979 2534 Delete type=2 #12
