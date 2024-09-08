@@ -32,6 +32,10 @@ class TiktokFeedsProviders:
         print("TikTokFeedsProviders : Ajout d'une chrome windows terminé.")
         return driver
 
+    def deleteChromeDriver(self):
+        self.driver.close()
+        self.driver.quit()
+
     def getProvideTiktokFeeds(self):
         # Charger le fichier contenant les liens TikTok et YouTube
         with open(self.tiktok_link, 'r') as file:
