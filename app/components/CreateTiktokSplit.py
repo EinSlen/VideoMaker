@@ -172,7 +172,7 @@ class CreateTiktokSplit:
                         return
 
                     try:
-                        print(f"Create Video : {index+1}/{len(self.list_main_video)}")
+                        print(f"Create Video : {index+1}/{total_duration//TIKTOK_TEMPS_VIDEO}")
                         # Redimensionner les vidéos tout en maintenant le rapport d'aspect
                         segment = segment.resize(
                             height=RESOLUTION_TIKTOK[1])
@@ -184,6 +184,7 @@ class CreateTiktokSplit:
 
                         # Créer un array de clips côte à côte
                         combined_clip = clips_array([[segment, secondary_video]])
+                        combined_clip = combined_clip.set_duration(TIKTOK_TEMPS_VIDEO)
 
                         #resize le clip finish
                         resolution_temp = (RESOLUTION_TIKTOK[0], 1000)
@@ -191,7 +192,7 @@ class CreateTiktokSplit:
 
                         if self.is_add_sound:
                             sound_files = [f for f in os.listdir(SOUND_DIRECTORY) if f.endswith('.mp3')]
-                            if sound_files:
+                            if len(sound_files) > 0:
                                 random_sound = random.choice(sound_files)
                                 added_audio = AudioFileClip(os.path.join(SOUND_DIRECTORY, random_sound)).volumex(0.01)
                                 original_audio = combined_clip.audio
@@ -218,6 +219,7 @@ class CreateTiktokSplit:
 
             finally:
                 main_video.close()
+                self.tiktokFeedsProviders.deleteChromeDriver()
                 try:
                     if self.is_upload_tiktok and len(self.tiktok_link_for_upload) > 0:
                         for link, title in self.tiktok_link_for_upload:
@@ -238,9 +240,11 @@ createTiktokSplit.split_video()
 """
 
 def createTiktokSplit_TASK():
-    createTiktokSplit = CreateTiktokSplit(1, True, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
+    createTiktokSplit = CreateTiktokSplit(1, False, True) # on a 2 arguments optionnel (la taille des liens de la liste de base c'est 1 lien) et un pour upload sur tiktok automatiquement CreateTiktokSplit(5, true)
     createTiktokSplit.split_video()
 
+createTiktokSplit_TASK()
+"""
 for hour in HOUR_LIST:
     schedule.every().day.at(hour).do(createTiktokSplit_TASK)
 
@@ -249,3 +253,4 @@ print("Start to wait task : " + str(createTiktokSplit_TASK.__name__))
 while True:
     schedule.run_pending()
     time.sleep(1)
+"""
