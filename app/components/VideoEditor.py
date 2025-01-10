@@ -12,7 +12,7 @@ from moviepy.editor import VideoFileClip, CompositeVideoClip
 
 import speech_recognition as sr
 
-from app.components.SubtitleSrt import SubtitlesGenerator
+#from app.components.SubtitleSrt import SubtitlesGenerator
 from app.configuration import *
 
 
@@ -100,7 +100,7 @@ class VideoEditor:
 
             print(f"VideoMaker : Audio .wave ({PATH_TEMP+temp_audio_path}) -> .srt {PATH_TEMP+srt_path}")
 
-            SubtitlesGenerator(PATH_TEMP+temp_audio_path, PATH_TEMP+srt_path)
+            # SubtitlesGenerator(PATH_TEMP+temp_audio_path, PATH_TEMP+srt_path)
 
             video_clip = VideoFileClip(input_video_path)
             subtitle_clip = self.create_subtitle_clip_from_srt(PATH_TEMP + srt_path, video_clip.size)

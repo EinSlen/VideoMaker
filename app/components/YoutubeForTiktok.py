@@ -4,7 +4,7 @@ import threading
 import requests
 from bs4 import BeautifulSoup
 
-from app.components.TiktokUploader import TiktokUploader
+from app.components.TiktokUploader import upload_to_tiktok
 from app.components.TrendingVideo import TrendingVideo, get_video_length
 from app.components.VideoEditor import VideoEditor
 from app.configuration import VIDEOS_LIMIT_FOR_YT_TO_TK
@@ -93,7 +93,7 @@ class YoutubeForTiktok:
                     print("YoutubeForTiktok: Aucune vidéo n'est disponible.")
 
     def upload_to_tiktok(self):
-        TiktokUploader(self.videos_with_format_tiktok)
+        upload_to_tiktok(self.videos_with_format_tiktok)
         #tiktok_upload.upload()
 
     def start(self):

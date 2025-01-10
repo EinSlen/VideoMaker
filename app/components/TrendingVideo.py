@@ -66,14 +66,15 @@ def get_video_length(video_url):
         return "Erreur lors de la requête"
 
 
-
 """
 trending = TrendingVideo()
 videos = trending.get_trending_videos()
 
+print(videos)
 #Récupérer les vidéos id et les titles
-for title, video_id in videos:
+for title, video_id, channel_name in videos:
     print("Titre:", title)
     print("Video ID:", video_id)
+    print("Channel Name:", channel_name)
     print()
 """
